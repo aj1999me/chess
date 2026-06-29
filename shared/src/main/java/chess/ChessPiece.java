@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -49,7 +50,34 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves = new ArrayList<>();
+        if (type == PieceType.KING) {
+            if (!myPosition.rightEdge()) {
+                moves.add(new ChessMove(myPosition, myPosition.moveRight()));
+            }
+            if (!myPosition.leftEdge()) {
+                moves.add(new ChessMove(myPosition, myPosition.moveLeft()));
+            }
+            if (!myPosition.topEdge()) {
+                moves.add(new ChessMove(myPosition, myPosition.moveForward()));
+                if (!myPosition.leftEdge()) {
+                    moves.add(new ChessMove(myPosition, myPosition.moveForwardLeft()));
+                }
+                if (!myPosition.rightEdge()) {
+                    moves.add(new ChessMove(myPosition, myPosition.moveForwardRight()));
+                }
+            }
+            if (!myPosition.bottomEdge()) {
+                moves.add(new ChessMove(myPosition, myPosition.moveBack()));
+                if (!myPosition.leftEdge()) {
+                    moves.add(new ChessMove(myPosition, myPosition.moveBackLeft()));
+                }
+                if (!myPosition.rightEdge()) {
+                    moves.add(new ChessMove(myPosition, myPosition.moveBackRight()));
+                }
+            }
+        }
+        return moves;
     }
 
     private final ChessGame.TeamColor color;

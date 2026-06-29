@@ -10,6 +10,12 @@ import java.util.Objects;
  */
 public class ChessMove {
 
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
+        start = startPosition;
+        end = endPosition;
+        promType = null;
+    }
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         start = startPosition;
