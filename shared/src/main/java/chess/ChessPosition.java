@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * Represents a single square position on a chess board
@@ -80,6 +81,30 @@ public class ChessPosition {
 
     public boolean leftEdge() {
         return col == 1;
+    }
+
+    private final static int[][] KnightMoves = {{2,1}, {1,2}, {-1,2}, {-2,1}, {-2,-1}, {-1,-2}, {1,-2}, {2,-1}};
+
+    public static int[][] getKnightMoves() {
+        return KnightMoves;
+    }
+
+    private final static int[][] KingMoves = {{1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
+
+    public static int[][] getKingMoves() {
+        return KingMoves;
+    }
+
+    private final static int[][] RookMoves = {{1,0}, {0,1}, {-1,0}, {0,-1}};
+
+    public static int[][] getRookMoves() {
+        return RookMoves;
+    }
+
+    private final static int[][] BishopMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
+
+    public static int[][] getBishopMoves() {
+        return BishopMoves;
     }
 
     @Override

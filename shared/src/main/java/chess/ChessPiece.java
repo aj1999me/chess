@@ -52,30 +52,47 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if (type == PieceType.KING) {
-            if (!myPosition.rightEdge()) {
-                moves.add(new ChessMove(myPosition, myPosition.moveRight()));
-            }
-            if (!myPosition.leftEdge()) {
-                moves.add(new ChessMove(myPosition, myPosition.moveLeft()));
-            }
-            if (!myPosition.topEdge()) {
-                moves.add(new ChessMove(myPosition, myPosition.moveForward()));
-                if (!myPosition.leftEdge()) {
-                    moves.add(new ChessMove(myPosition, myPosition.moveForwardLeft()));
-                }
-                if (!myPosition.rightEdge()) {
-                    moves.add(new ChessMove(myPosition, myPosition.moveForwardRight()));
+            for (var direction : ChessPosition.getKingMoves()) {
+                int newRow = myPosition.getRow() + direction[0];
+                int newCol = myPosition.getColumn() + direction[1];
+                if (newRow > 0 && newRow < 9 && newCol > 0 && newCol < 9) {
+                    ChessPosition dest = new ChessPosition(newRow, newCol);
+                    if (board.getPiece(dest) == null || board.getPiece(dest).getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, dest));
+                    }
                 }
             }
-            if (!myPosition.bottomEdge()) {
-                moves.add(new ChessMove(myPosition, myPosition.moveBack()));
-                if (!myPosition.leftEdge()) {
-                    moves.add(new ChessMove(myPosition, myPosition.moveBackLeft()));
-                }
-                if (!myPosition.rightEdge()) {
-                    moves.add(new ChessMove(myPosition, myPosition.moveBackRight()));
+
+        } else if (type == PieceType.KNIGHT) {
+            for (var direction : ChessPosition.getKnightMoves()) {
+                int newRow = myPosition.getRow() + direction[0];
+                int newCol = myPosition.getColumn() + direction[1];
+                if (newRow > 0 && newRow < 9 && newCol > 0 && newCol < 9) {
+                    ChessPosition dest = new ChessPosition(newRow, newCol);
+                    if (board.getPiece(dest) == null || board.getPiece(dest).getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, dest));
+                    }
                 }
             }
+        } else if (type == PieceType.PAWN) {
+            int rowChange;
+            if (color == ChessGame.TeamColor.WHITE) {
+                rowChange = 1;
+            } else {
+                rowChange = -1;
+            }
+            int newRow = myPosition.getRow() + rowChange;
+            ChessPosition inFront = new ChessPosition(newRow, myPosition.getColumn());
+            if (board.getPiece(inFront) == null) {
+                if (newRow == 1 || newRow == 8) {
+                    for (var piece : PieceType.values()) {
+                        moves.add(new ChessMove(myPosition, inFront, piece));
+                    }
+                } else {
+                    moves.add(new ChessMove(myPosition, inFront));
+                }
+            }
+            if ()
         }
         return moves;
     }
