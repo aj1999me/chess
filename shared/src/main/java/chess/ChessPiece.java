@@ -49,6 +49,19 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+
+    /*private void movePawn(Collection<ChessMove> moves, ChessBoard board, ChessPosition myPosition, ChessPosition moveTo, int row) {
+        if (board.getPiece(moveTo) == null) {
+            if (row == 1 || row == 8) {
+                for (var piece : PieceType.values()) {
+                    moves.add(new ChessMove(myPosition, inFront, piece));
+                }
+            } else {
+                moves.add(new ChessMove(myPosition, inFront));
+            }
+        }
+    }*/
+
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if (type == PieceType.KING) {
@@ -82,17 +95,55 @@ public class ChessPiece {
                 rowChange = -1;
             }
             int newRow = myPosition.getRow() + rowChange;
+            int doubleMoveRow = newRow + rowChange;
+            boolean promotionTime = newRow == 1 || newRow == 8;
             ChessPosition inFront = new ChessPosition(newRow, myPosition.getColumn());
-            if (board.getPiece(inFront) == null) {
-                if (newRow == 1 || newRow == 8) {
+            ChessPosition doubleStart = new ChessPosition(doubleMoveRow, myPosition.getColumn());
+            ChessPosition diag1 = new ChessPosition(newRow, myPosition.getColumn() + 1);
+            ChessPosition diag2 = new ChessPosition(newRow, myPosition.getColumn() - 1);
+
+            boolean canGoForward = board.getPiece(inFront) == null;
+            boolean canGoDouble = (rowChange > 0 && myPosition.getRow() == 2 && canGoForward
+                    && board.getPiece(doubleStart) == null) || (rowChange < 0 && myPosition.getRow() == 7 && canGoForward
+                    && board.getPiece(doubleStart) == null);
+            boolean canTake1 = board.getPiece(diag1) != null && board.getPiece(diag1).getTeamColor() != color;
+            boolean canTake2 = board.getPiece(diag2) != null && board.getPiece(diag2).getTeamColor() != color;
+            if (promotionTime) {
+                if (canGoForward) {
                     for (var piece : PieceType.values()) {
-                        moves.add(new ChessMove(myPosition, inFront, piece));
+                        if (piece != PieceType.PAWN && piece != PieceType.KING) {
+                            moves.add(new ChessMove(myPosition, inFront, piece));
+                        }
                     }
-                } else {
+                }
+                if (canTake1) {
+                    for (var piece : PieceType.values()) {
+                        if (piece != PieceType.PAWN && piece != PieceType.KING) {
+                            moves.add(new ChessMove(myPosition, diag1, piece));
+                        }
+                    }
+                }
+                if (canTake2) {
+                    for (var piece : PieceType.values()) {
+                        if (piece != PieceType.PAWN && piece != PieceType.KING) {
+                            moves.add(new ChessMove(myPosition, diag2, piece));
+                        }
+                    }
+                }
+            } else {
+                if (canGoForward) {
                     moves.add(new ChessMove(myPosition, inFront));
                 }
+                if (canTake1) {
+                    moves.add(new ChessMove(myPosition, diag1));
+                }
+                if (canTake2) {
+                    moves.add(new ChessMove(myPosition, diag2));
+                }
+                if (canGoDouble) {
+                    moves.add(new ChessMove(myPosition, doubleStart));
+                }
             }
-            if ()
         }
         return moves;
     }
