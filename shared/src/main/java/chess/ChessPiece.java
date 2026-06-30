@@ -95,6 +95,24 @@ public class ChessPiece {
                 }
             }
 
+        } else if (type == PieceType.ROOK) {
+            for (var direction : ChessPosition.getRookMoves()) {
+                int row = myPosition.getRow() + direction[0];
+                int col = myPosition.getColumn() + direction[1];
+                while (row < 9 && row > 0 && col < 9 && col > 0) {
+                    ChessPosition dest = new ChessPosition(row, col);
+                    if (board.getPiece(dest) == null) {
+                        moves.add(new ChessMove(myPosition, dest));
+                        row = row + direction[0];
+                        col = col + direction[1];
+                    } else if (board.getPiece(dest).getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, dest));
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
         } else if (type == PieceType.KNIGHT) {
             for (var direction : ChessPosition.getKnightMoves()) {
                 int newRow = myPosition.getRow() + direction[0];
