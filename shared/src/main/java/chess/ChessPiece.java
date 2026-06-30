@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -50,18 +51,6 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
 
-    /*private void movePawn(Collection<ChessMove> moves, ChessBoard board, ChessPosition myPosition, ChessPosition moveTo, int row) {
-        if (board.getPiece(moveTo) == null) {
-            if (row == 1 || row == 8) {
-                for (var piece : PieceType.values()) {
-                    moves.add(new ChessMove(myPosition, inFront, piece));
-                }
-            } else {
-                moves.add(new ChessMove(myPosition, inFront));
-            }
-        }
-    }*/
-
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if (type == PieceType.KING) {
@@ -75,7 +64,6 @@ public class ChessPiece {
                     }
                 }
             }
-
         } else if (type == PieceType.QUEEN) {
             for (var direction : ChessPosition.getKingMoves()) {
                 int row = myPosition.getRow() + direction[0];
@@ -94,9 +82,26 @@ public class ChessPiece {
                     }
                 }
             }
-
         } else if (type == PieceType.ROOK) {
             for (var direction : ChessPosition.getRookMoves()) {
+                int row = myPosition.getRow() + direction[0];
+                int col = myPosition.getColumn() + direction[1];
+                while (row < 9 && row > 0 && col < 9 && col > 0) {
+                    ChessPosition dest = new ChessPosition(row, col);
+                    if (board.getPiece(dest) == null) {
+                        moves.add(new ChessMove(myPosition, dest));
+                        row = row + direction[0];
+                        col = col + direction[1];
+                    } else if (board.getPiece(dest).getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, dest));
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        } else if (type == PieceType.BISHOP) {
+            for (var direction : ChessPosition.getBishopMoves()) {
                 int row = myPosition.getRow() + direction[0];
                 int col = myPosition.getColumn() + direction[1];
                 while (row < 9 && row > 0 && col < 9 && col > 0) {
@@ -187,4 +192,18 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor color;
     private final PieceType type;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || o.getClass() != getClass()) {
+            return false;
+        }
+        ChessPiece other = (ChessPiece) o;
+        return other.color == color && other.type == type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, type);
+    }
 }
