@@ -11,7 +11,6 @@ import java.util.Collection;
 public class ChessGame {
 
     public ChessGame() {
-
     }
 
     /**
@@ -56,7 +55,14 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.pieces.get(move.getStartPosition());
+        board.pieces.remove(move.getStartPosition());
+        if (move.getPromotionPiece() == null) {
+            board.pieces.put(move.getEndPosition(), piece);
+        } else {
+            board.pieces.put(move.getEndPosition(),
+                    new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        }
     }
 
     /**
@@ -109,4 +115,5 @@ public class ChessGame {
     }
 
     private TeamColor turn;
+    private ChessBoard board;
 }

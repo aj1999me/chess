@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * Represents a single square position on a chess board
