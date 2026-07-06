@@ -9,6 +9,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
+    private final ChessPosition start;
+    private final ChessPosition end;
+    private final ChessPiece.PieceType promType;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition) {
         start = startPosition;
@@ -53,12 +56,7 @@ public class ChessMove {
             return false;
         }
         ChessMove other = (ChessMove) o;
-        if (start.equals(other.start) && end.equals(other.end)) {
-            if (promType == null) {
-                return other.promType == null;
-            }
-            return promType.equals(other.promType);
-        } return false;
+        return start.equals(other.start) && end.equals(other.end) && promType == other.promType;
     }
 
     @Override
@@ -66,7 +64,4 @@ public class ChessMove {
         return Objects.hash(start, end, promType);
     }
 
-    private final ChessPosition start;
-    private final ChessPosition end;
-    private final ChessPiece.PieceType promType;
 }

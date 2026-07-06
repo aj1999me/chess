@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Objects;
-import java.util.ArrayList;
 
 /**
  * Represents a single square position on a chess board
@@ -10,6 +9,8 @@ import java.util.ArrayList;
  * signature of the existing methods.
  */
 public class ChessPosition {
+    private final int row;
+    private final int col;
 
     public ChessPosition(int row, int col) {
         this.row = row;
@@ -32,45 +33,17 @@ public class ChessPosition {
         return col;
     }
 
-    private final int col;
-    private final int row;
-
-    private final static int[][] KnightMoves = {{2,1}, {1,2}, {-1,2}, {-2,1}, {-2,-1}, {-1,-2}, {1,-2}, {2,-1}};
-
-    public static int[][] getKnightMoves() {
-        return KnightMoves;
-    }
-
-    private final static int[][] KingMoves = {{1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
-
-    public static int[][] getKingMoves() {
-        return KingMoves;
-    }
-
-    private final static int[][] RookMoves = {{1,0}, {0,1}, {-1,0}, {0,-1}};
-
-    public static int[][] getRookMoves() {
-        return RookMoves;
-    }
-
-    private final static int[][] BishopMoves = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
-
-    public static int[][] getBishopMoves() {
-        return BishopMoves;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || o.getClass() != getClass()) {
             return false;
         }
-        ChessPosition that = (ChessPosition) o;
-        return col == that.col && row == that.row;
+        ChessPosition other = (ChessPosition) o;
+        return other.row == row && other.col == col;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(col, row);
+        return Objects.hash(row, col);
     }
-
 }

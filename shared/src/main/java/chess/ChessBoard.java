@@ -2,6 +2,7 @@ package chess;
 
 import java.util.HashMap;
 import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -9,11 +10,26 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    public HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
+    private HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
+    private final static int[][] defaultBoard = {/*white king*/{1,5,0,0},
+            /*black king*/{8,5,1,0}, /*white queen*/{1,4,0,1},
+            /*black queen*/{8,4,1,1}, /*white rooks*/{1,1,0,2}, {1,8,0,2},
+            /*black rooks*/{8,1,1,2}, {8,8,1,2}, /*white bishops*/{1,3,0,3},
+            {1,6,0,3}, /*black bishops*/{8,3,1,3}, {8,6,1,3},
+            /*white knights*/{1,2,0,4}, {1,7,0,4}, /*black knights*/
+            {8,2,1,4}, {8,7,1,4}, /*white pawns*/{2,1,0,5}, {2,2,0,5},
+            {2,3,0,5}, {2,4,0,5}, {2,5,0,5}, {2,6,0,5}, {2,7,0,5},
+            {2,8,0,5}, /*black pawns*/{7,1,1,5}, {7,2,1,5},
+            {7,3,1,5}, {7,4,1,5}, {7,5,1,5}, {7,6,1,5}, {7,7,1,5},
+            {7,8,1,5}};
 
     public ChessBoard() {
-        
+
     }
+
+    /*public ChessBoard(ChessBoard copy) {
+
+    }*/
 
     /**
      * Adds a chess piece to the chessboard
@@ -24,6 +40,7 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         pieces.put(position, piece);
     }
+
     /**
      * Gets a chess piece on the chessboard
      *
@@ -35,55 +52,19 @@ public class ChessBoard {
         return pieces.get(position);
     }
 
-    private static final int[][] whitePawns = {{2,1}, {2,2}, {2,3},
-            {2,4}, {2,5}, {2,6}, {2,7}, {2,8}};
-    private static final int[][] blackPawns = {{7,1}, {7,2}, {7,3}, {7,4},
-            {7,5}, {7,6}, {7,7}, {7,8}};
-    private static final int[][] whiteRooks = {{1,1}, {1,8}};
-    private static final int[][] blackRooks = {{8,1}, {8,8}};
-    private static final int[][] whiteKnights = {{1,2}, {1,7}};
-    private static final int[][] blackKnights = {{8,2}, {8,7}};
-    private static final int[][] whiteBishops = {{1,3}, {1,6}};
-    private static final int[][] blackBishops = {{8,3}, {8,6}};
-
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
+
+    public void removePiece(ChessPosition position) {
+        pieces.remove(position);
+    }
+
     public void resetBoard() {
-        pieces.clear();
-        for (var coordinates : whitePawns) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-        } for (var coordinates : blackPawns) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-        } for (var coordinates : whiteRooks) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
-        } for (var coordinates : blackRooks) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
-        } for (var coordinates : whiteKnights) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        } for (var coordinates : blackKnights) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
-        } for (var coordinates : whiteBishops) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
-        } for (var coordinates : blackBishops) {
-            addPiece(new ChessPosition(coordinates[0], coordinates[1]),
-                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
-        } addPiece(new ChessPosition(1,5),
-                    new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
-        addPiece(new ChessPosition(1,4),
-                new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(8,5),
-                new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-        addPiece(new ChessPosition(8,4),
-                new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+        for (var info : defaultBoard) {
+            addPiece(new ChessPosition(info[0],info[1]), new ChessPiece(info[2], info[3]));
+        }
     }
 
     @Override
