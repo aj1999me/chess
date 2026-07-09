@@ -63,20 +63,11 @@ public class ChessGame {
         for (var move : moves) {
             var test = new ChessGame(this);
             test.tryMove(move);
-            /*if (move.getPromotionPiece() == null) {
-                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-            } else {
-                ChessPiece.PieceType type = move.getPromotionPiece();
-                TeamColor color = board.getPiece(move.getStartPosition()).getTeamColor();
-                board.addPiece(move.getEndPosition(), new ChessPiece(color, type));
-            }*/
-            board.removePiece(move.getStartPosition());
             if (test.isInCheck(turn)) {
                 moves.remove(move);
             }
         }
         return moves;
-//        throw new RuntimeException("Not implemented");
     }
 
     public void tryMove(ChessMove move) {
@@ -104,21 +95,15 @@ public class ChessGame {
 
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (board.getPiece(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("no piece there");
+        }
         if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
             throw new InvalidMoveException("not your turn");
-        } else if (!board.getPiece(move.getStartPosition())
-                .pieceMoves(board, move.getStartPosition()).contains(move)) {
+        } else if (!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException("invalid move");
         }
         tryMove(move);
-        /*if (move.getPromotionPiece() == null) {
-            board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
-        } else {
-            ChessPiece.PieceType type = move.getPromotionPiece();
-            TeamColor color = board.getPiece(move.getStartPosition()).getTeamColor();
-            board.addPiece(move.getEndPosition(), new ChessPiece(color, type));
-        }
-        board.removePiece(move.getStartPosition());*/
     }
 
     /**
@@ -128,16 +113,16 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition enemyKing;
+        ChessPosition ownKing;
         if (teamColor == TeamColor.WHITE) {
-            enemyKing = board.whiteKingSquare;
+            ownKing = board.whiteKingSquare;
         } else {
-            enemyKing = board.blackKingSquare;
+            ownKing = board.blackKingSquare;
         }
         for (var entry : board.pieces.entrySet()) {
             if (entry.getValue().getTeamColor() != teamColor) {
                 for (var move : entry.getValue().pieceMoves(board, entry.getKey())) {
-                    if (move.getEndPosition().equals(enemyKing)) {
+                    if (move.getEndPosition().equals(ownKing)) {
                         return true;
                     }
                 }
@@ -147,6 +132,18 @@ public class ChessGame {
 //        throw new RuntimeException("Not implemented");
     }
 
+    public int countMoves(TeamColor team) {
+        int moves = 0;
+        for (var square : board.pieces.keySet()) {
+            if (board.pieces.get(square).getTeamColor() == team) {
+                for (var move : validMoves(square)) {
+                    moves++;
+                }
+            }
+        }
+        return moves;
+    }
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -154,8 +151,8 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        /*if (isInCheck(teamColor))*/
-        throw new RuntimeException("Not implemented");
+        return isInCheck(teamColor) && countMoves(teamColor) == 0;
+        /*throw new RuntimeException("Not implemented");*/
     }
 
     /**
@@ -166,7 +163,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return !isInCheck(teamColor) && countMoves(teamColor) == 0;
+        /*throw new RuntimeException("Not implemented");*/
     }
 
     /**
