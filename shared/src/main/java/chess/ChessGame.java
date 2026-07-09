@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Iterator;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -60,11 +61,13 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
-        for (var move : moves) {
+        Iterator<ChessMove> iter = moves.iterator();
+        while (iter.hasNext()) {
+            ChessMove move = iter.next();
             var test = new ChessGame(this);
             test.tryMove(move);
             if (test.isInCheck(turn)) {
-                moves.remove(move);
+                iter.remove();
             }
         }
         return moves;
