@@ -72,6 +72,7 @@ public class ValidMovesTests {
     public void rookPinnedToKing() {
 
         var game = new ChessGame();
+        game.setTeamTurn(ChessGame.TeamColor.BLACK);
         game.setBoard(TestUtilities.loadBoard("""
                     |K| | | | | | |Q|
                     | | | | | | | | |
