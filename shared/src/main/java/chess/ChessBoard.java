@@ -9,7 +9,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessMap pieces = new ChessMap();
+    protected ChessMap pieces = new ChessMap();
+    private ChessPosition whiteKing;
+    private ChessPosition blackKing;
     private final static int[][] defaultBoard = {/*white king*/{1,5,0,0},
             /*black king*/{8,5,1,0}, /*white queen*/{1,4,0,1},
             /*black queen*/{8,4,1,1}, /*white rooks*/{1,1,0,2}, {1,8,0,2},

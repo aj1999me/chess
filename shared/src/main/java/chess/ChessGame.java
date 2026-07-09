@@ -51,11 +51,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        /*Collection<ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+        if (board.getPiece(startPosition) == null) {
+            return null;
+        }
+        Collection<ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
         for (var move : moves) {
             ChessBoard test = board;// make deep copy of board
             if (test.isInCheck(this.turn))
-        }*/
+        }
         throw new RuntimeException("Not implemented");
     }
 
@@ -83,7 +86,17 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for (var entry : board.pieces.entrySet()) {
+            if (entry.getValue().getTeamColor() != teamColor) {
+                for (var move : entry.getValue().pieceMoves(board, entry.getKey())) {
+                    if (move.getEndPosition().equals(enemyKingPosition)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+//        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -93,6 +106,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        /*if (isInCheck(teamColor))*/
         throw new RuntimeException("Not implemented");
     }
 
