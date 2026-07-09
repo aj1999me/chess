@@ -132,7 +132,6 @@ public class ChessGame {
             }
         }
         return false;
-//        throw new RuntimeException("Not implemented");
     }
 
     public int countMoves(TeamColor team) {
@@ -155,7 +154,6 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         return isInCheck(teamColor) && countMoves(teamColor) == 0;
-        /*throw new RuntimeException("Not implemented");*/
     }
 
     /**
@@ -167,7 +165,6 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         return !isInCheck(teamColor) && countMoves(teamColor) == 0;
-        /*throw new RuntimeException("Not implemented");*/
     }
 
     /**
