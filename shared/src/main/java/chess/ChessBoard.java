@@ -45,6 +45,9 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
+        if (piece == null) {
+            return;
+        }
         if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                 whiteKingSquare = position;
