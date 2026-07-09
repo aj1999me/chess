@@ -47,6 +47,11 @@ public class ChessPiece {
         }
     }
 
+    public ChessPiece(ChessPiece copy) {
+        type = copy.type;
+        color = copy.color;
+    }
+
     /**
      * The various different chess piece options
      */
