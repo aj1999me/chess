@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class ChessBoard {
     protected ChessMap pieces = new ChessMap();
-    private ChessPosition whiteKing;
-    private ChessPosition blackKing;
+    protected ChessPosition whiteKingSquare;
+    protected ChessPosition blackKingSquare;
     private final static int[][] defaultBoard = {/*white king*/{1,5,0,0},
             /*black king*/{8,5,1,0}, /*white queen*/{1,4,0,1},
             /*black queen*/{8,4,1,1}, /*white rooks*/{1,1,0,2}, {1,8,0,2},
@@ -30,6 +30,8 @@ public class ChessBoard {
 
     public ChessBoard(ChessBoard copy) {
         pieces = copy.pieces.clone();
+        whiteKingSquare = new ChessPosition(copy.whiteKingSquare);
+        blackKingSquare = new ChessPosition(copy.blackKingSquare);
     }
 
     /*public ChessBoard(ChessBoard copy) {
@@ -43,6 +45,13 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                whiteKingSquare = position;
+            } else {
+                blackKingSquare = position;
+            }
+        }
         pieces.put(position, piece);
     }
 
@@ -78,11 +87,13 @@ public class ChessBoard {
             return false;
         }
         ChessBoard other = (ChessBoard) o;
-        return pieces.equals(other.pieces);
+        return pieces.equals(other.pieces) &&
+                whiteKingSquare.equals(other.whiteKingSquare)
+                && blackKingSquare.equals(other.blackKingSquare);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieces);
+        return Objects.hash(pieces, whiteKingSquare, blackKingSquare);
     }
 }

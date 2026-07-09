@@ -86,10 +86,16 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
+        ChessPosition enemyKing;
+        if (teamColor == TeamColor.WHITE) {
+            enemyKing = board.whiteKingSquare;
+        } else {
+            enemyKing = board.blackKingSquare;
+        }
         for (var entry : board.pieces.entrySet()) {
             if (entry.getValue().getTeamColor() != teamColor) {
                 for (var move : entry.getValue().pieceMoves(board, entry.getKey())) {
-                    if (move.getEndPosition().equals(enemyKingPosition)) {
+                    if (move.getEndPosition().equals(enemyKing)) {
                         return true;
                     }
                 }
