@@ -19,6 +19,11 @@ public class ChessGame {
         board.resetBoard();
     }
 
+    public ChessGame(ChessGame copy) {
+        turn = copy.turn;
+        board = new ChessBoard(copy.board);
+    }
+
     /**
      * @return Which team's turn it is
      */
@@ -56,19 +61,25 @@ public class ChessGame {
         }
         Collection<ChessMove> moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
         for (var move : moves) {
-            ChessBoard test = board;// make deep copy of board
-            if (test.isInCheck(this.turn))
+            var test = new ChessGame(this);
+            test.tryMove(move);
+            /*if (move.getPromotionPiece() == null) {
+                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+            } else {
+                ChessPiece.PieceType type = move.getPromotionPiece();
+                TeamColor color = board.getPiece(move.getStartPosition()).getTeamColor();
+                board.addPiece(move.getEndPosition(), new ChessPiece(color, type));
+            }*/
+            board.removePiece(move.getStartPosition());
+            if (test.isInCheck(turn)) {
+                moves.remove(move);
+            }
         }
-        throw new RuntimeException("Not implemented");
+        return moves;
+//        throw new RuntimeException("Not implemented");
     }
 
-    /**
-     * Makes a move in the chess game
-     *
-     * @param move chess move to perform
-     * @throws InvalidMoveException if move is invalid
-     */
-    public void makeMove(ChessMove move) throws InvalidMoveException {
+    public void tryMove(ChessMove move) {
         if (move.getPromotionPiece() == null) {
             board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
         } else {
@@ -77,6 +88,37 @@ public class ChessGame {
             board.addPiece(move.getEndPosition(), new ChessPiece(color, type));
         }
         board.removePiece(move.getStartPosition());
+        if (turn == TeamColor.WHITE) {
+            turn = TeamColor.BLACK;
+        } else {
+            turn = TeamColor.WHITE;
+        }
+    }
+
+    /**
+     * Makes a move in the chess game
+     *
+     * @param move chess move to perform
+     * @throws InvalidMoveException if move is invalid
+     */
+
+
+    public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
+            throw new InvalidMoveException("not your turn");
+        } else if (!board.getPiece(move.getStartPosition())
+                .pieceMoves(board, move.getStartPosition()).contains(move)) {
+            throw new InvalidMoveException("invalid move");
+        }
+        tryMove(move);
+        /*if (move.getPromotionPiece() == null) {
+            board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+        } else {
+            ChessPiece.PieceType type = move.getPromotionPiece();
+            TeamColor color = board.getPiece(move.getStartPosition()).getTeamColor();
+            board.addPiece(move.getEndPosition(), new ChessPiece(color, type));
+        }
+        board.removePiece(move.getStartPosition());*/
     }
 
     /**
