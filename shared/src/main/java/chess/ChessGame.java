@@ -66,7 +66,7 @@ public class ChessGame {
             ChessMove move = iter.next();
             var test = new ChessGame(this);
             test.tryMove(move);
-            if (test.isInCheck(turn)) {
+            if (test.isInCheck(board.getPiece(startPosition).getTeamColor())) {
                 iter.remove();
             }
         }
