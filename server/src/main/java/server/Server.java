@@ -1,9 +1,10 @@
 package server;
 
 import io.javalin.*;
-
+import
 public class Server {
 
+    private
     private final Javalin javalin;
 
     public Server() {
