@@ -1,10 +1,14 @@
 package server;
 
 import io.javalin.*;
-import
+import model.*;
+import java.util.TreeMap;
 public class Server {
 
-    private
+    private TreeMap<String, userData> userDB;
+    private TreeMap<String/*authToken*/, authData> authDB;
+    private TreeMap<Integer/*gameID*/, gameData> gameDB;
+
     private final Javalin javalin;
 
     public Server() {
