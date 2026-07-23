@@ -1,18 +1,22 @@
 package server;
 
 import io.javalin.*;
+import dataaccess.database;
 import model.*;
-import java.util.TreeMap;
+import service.*;
+
 public class Server {
 
-    private TreeMap<String, userData> userDB;
-    private TreeMap<String/*authToken*/, authData> authDB;
-    private TreeMap<Integer/*gameID*/, gameData> gameDB;
-
     private final Javalin javalin;
+    private database db;
+    private final UserService us;
+    private final GameService gs;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        db = new database();
+        us = new UserService(db);
+        gs = new GameService(db);
 
         // Register your endpoints and exception handlers here.
 
@@ -26,4 +30,6 @@ public class Server {
     public void stop() {
         javalin.stop();
     }
+
+    public enum UserColor {WHITE, BLACK}
 }
