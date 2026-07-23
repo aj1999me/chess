@@ -32,4 +32,5 @@ public class Server {
     }
 
     public enum UserColor {WHITE, BLACK}
+
 }
