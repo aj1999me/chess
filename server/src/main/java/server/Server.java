@@ -13,10 +13,17 @@ public class Server {
     private final GameService gs;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
         db = new database();
         us = new UserService(db);
         gs = new GameService(db);
+        javalin = Javalin.create(config -> config.staticFiles.add("web"))
+                .post("/user", this::register)
+                .post("/session", this::login)
+                .delete("/db", this::clear)
+                .delete("/session", this::logout)
+                .get("/game", this::list)
+                .post("/game", this::create)
+                .put("/game", this::join);
 
         // Register your endpoints and exception handlers here.
 
