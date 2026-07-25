@@ -15,6 +15,7 @@ public class UserService {
     public static String generateToken() {
         return UUID.randomUUID().toString();
     }
+
     public RegisterResult register(RegisterRequest req) throws DataAccessException {
         if (db.getUser(req.username()) != null) {
             throw new DataAccessException("username already taken");
@@ -36,5 +37,9 @@ public class UserService {
             throw new DataAccessException("unauthorized access");
         }
         db.removeAuth(req.authToken());
+    }
+
+    public void clear() {
+        db.clear();
     }
 }

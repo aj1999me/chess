@@ -18,15 +18,16 @@ public class GameService {
 
         return new ListResult(db.getList());
     }
-    public void makeGame(MakeGameRequest req) throws DataAccessException {
+    public MakeGameResult makeGame(MakeGameRequest req) throws DataAccessException {
         if (!db.checkAuth(req.authToken())) {
             throw new DataAccessException("unauthorized access");
         }
         if (db.getGame(req.gameName().hashCode()) != null) {
             throw new DataAccessException("game already exists");
         }
-        db.addGame(new gameData(req.gameName().hashCode(), null, null, req.gameName(), new ChessGame()));
-
+        int gameID = req.gameName().hashCode();
+        db.addGame(new gameData(gameID, null, null, req.gameName(), new ChessGame()));
+        return new MakeGameResult(gameID);
     }
     public void joinGame(JoinRequest req) throws DataAccessException {
         if (!db.checkAuth(req.authToken())) {

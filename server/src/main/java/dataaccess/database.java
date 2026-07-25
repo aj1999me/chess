@@ -60,4 +60,10 @@ public class database implements dataModel {
         }
         return gameDB.get(gameID).blackUsername() == null;
     }
+
+    public void clear() {
+        authDB.clear();
+        userDB.clear();
+        gameDB.clear();
+    }
 }

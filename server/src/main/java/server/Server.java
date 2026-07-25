@@ -4,6 +4,9 @@ import io.javalin.*;
 import dataaccess.database;
 import model.*;
 import service.*;
+import io.javalin.http.Context;
+import com.google.gson.Gson;
+
 
 public class Server {
 
@@ -39,5 +42,43 @@ public class Server {
     }
 
     public enum UserColor {WHITE, BLACK}
+
+    private void register(Context cxt) {
+        RegisterResult result = us.register(getBodyObject(cxt, RegisterRequest.class));
+        cxt.json(result);
+    }
+
+    private void login(Context cxt) {
+        LoginResult result = us.login(getBodyObject(cxt, LoginRequest.class));
+        cxt.json(result);
+    }
+
+    private void logout(Context cxt) {
+        us.logout(getBodyObject(cxt, LogoutRequest.class));
+    }
+
+    private void clear(Context cxt) {
+        us.clear();
+    }
+
+    private void list(Context cxt) {
+        ListResult result = gs.listGames(getBodyObject(cxt, ListRequest.class));
+        cxt.json(result);
+    }
+
+    private void create(Context cxt) {
+        MakeGameResult result = gs.makeGame(getBodyObject(cxt, MakeGameRequest.class));
+        cxt.json(result);
+    }
+
+    private void join(Context cxt) {
+        gs.joinGame(getBodyObject(cxt, JoinRequest.class));
+    }
+
+    private static <T> T getBodyObject(Context context, Class<T> clazz) {
+        return new Gson().fromJson(context.body(), clazz);
+    }
+
+
 
 }
