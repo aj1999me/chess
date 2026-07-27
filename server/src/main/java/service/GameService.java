@@ -11,33 +11,33 @@ public class GameService {
         this.db = db;
     }
 
-    public ListResult listGames(ListRequest req) throws DataAccessException {
+    public ListResult listGames(ListRequest req) throws UnauthorizedAccessException {
         if (!db.checkAuth(req.authToken())) {
-            throw new DataAccessException("unauthorized access");
+            throw new UnauthorizedAccessException("unauthorized access");
         }
 
         return new ListResult(db.getList());
     }
-    public MakeGameResult makeGame(MakeGameRequest req) throws DataAccessException {
+    public MakeGameResult makeGame(MakeGameRequest req) throws UnauthorizedAccessException, AlreadyTakenException {
         if (!db.checkAuth(req.authToken())) {
-            throw new DataAccessException("unauthorized access");
+            throw new UnauthorizedAccessException("unauthorized access");
         }
         if (db.getGame(req.gameName().hashCode()) != null) {
-            throw new DataAccessException("game already exists");
+            throw new AlreadyTakenException("game already exists");
         }
         int gameID = req.gameName().hashCode();
         db.addGame(new gameData(gameID, null, null, req.gameName(), new ChessGame()));
         return new MakeGameResult(gameID);
     }
-    public void joinGame(JoinRequest req) throws DataAccessException {
+    public void joinGame(JoinRequest req) throws UnauthorizedAccessException, DataAccessException, AlreadyTakenException {
         if (!db.checkAuth(req.authToken())) {
-            throw new DataAccessException("unauthorized access");
+            throw new UnauthorizedAccessException("unauthorized access");
         }
         if (db.getGame(req.gameID()) == null) {
             throw new DataAccessException("game does not exist");
         }
         if (!db.checkColor(req.gameID(), req.color())) {
-            throw new DataAccessException("color already taken");
+            throw new AlreadyTakenException("color already taken");
         }
         db.updatePlayer(req.gameID(), req.color(), db.getAuth(req.authToken()).username());
     }

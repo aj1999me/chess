@@ -1,9 +1,8 @@
 package service;
 
 import java.util.UUID;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.*;
-import dataaccess.database;
 
 public class UserService {
     private database db;
@@ -16,25 +15,25 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public RegisterResult register(RegisterRequest req) throws DataAccessException {
+    public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
         if (db.getUser(req.username()) != null) {
-            throw new DataAccessException("username already taken");
+            throw new AlreadyTakenException("username already taken");
         }
         db.createUser(new userData(req.username(), req.password(), req.email()));
         db.addAuth(new authData(generateToken(), req.username()));
         return new RegisterResult(req.username(), generateToken());
     }
-    public LoginResult login(LoginRequest req) throws DataAccessException {
+    public LoginResult login(LoginRequest req) throws UnauthorizedAccessException {
         userData user = db.getUser(req.username());
         if (!user.password().equals(req.password())) {
-            throw new DataAccessException("wrong password");
+            throw new UnauthorizedAccessException("wrong password");
         }
 
         return new LoginResult(req.username(), generateToken());
     }
-    public void logout(LogoutRequest req) throws DataAccessException {
+    public void logout(LogoutRequest req) throws UnauthorizedAccessException {
         if (!db.checkAuth(req.authToken())) {
-            throw new DataAccessException("unauthorized access");
+            throw new UnauthorizedAccessException("unauthorized");
         }
         db.removeAuth(req.authToken());
     }
