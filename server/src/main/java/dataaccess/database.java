@@ -9,8 +9,14 @@ import server.Server.UserColor;
 
 public class database implements dataModel {
     private TreeMap<String, userData> userDB;
-    private TreeMap<String/*authToken*/, authData> authDB;
-    private TreeMap<Integer/*gameID*/, gameData> gameDB;
+    private TreeMap<String, authData> authDB;
+    private TreeMap<Integer, gameData> gameDB;
+
+    public database() {
+        userDB = new TreeMap<>();
+        authDB = new TreeMap<>();
+        gameDB = new TreeMap<>();
+    }
 
     public userData getUser(String username) {
         return userDB.get(username);
