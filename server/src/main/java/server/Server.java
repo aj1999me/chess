@@ -52,34 +52,40 @@ public class Server {
     private void register(Context cxt) throws AlreadyTakenException  {
         RegisterResult result = us.register(getBodyObject(cxt, RegisterRequest.class));
         cxt.status(200);
-        cxt.json(result);
+        cxt.result(new Gson().toJson(result));
     }
 
     private void login(Context cxt) throws UnauthorizedAccessException {
         LoginResult result = us.login(getBodyObject(cxt, LoginRequest.class));
-        cxt.json(result);
+        cxt.status(200);
+        cxt.result(new Gson().toJson(result));
     }
 
     private void logout(Context cxt) throws UnauthorizedAccessException{
         us.logout(getBodyObject(cxt, LogoutRequest.class));
+        cxt.status(200);
     }
 
     private void clear(Context cxt) {
         us.clear();
+        cxt.status(200);
     }
 
     private void list(Context cxt) throws UnauthorizedAccessException {
         ListResult result = gs.listGames(getBodyObject(cxt, ListRequest.class));
-        cxt.json(result);
+        cxt.status(200);
+        cxt.result(new Gson().toJson(result));
     }
 
     private void create(Context cxt) throws UnauthorizedAccessException, AlreadyTakenException {
         MakeGameResult result = gs.makeGame(getBodyObject(cxt, MakeGameRequest.class));
-        cxt.json(result);
+        cxt.status(200);
+        cxt.result(new Gson().toJson(result));
     }
 
     private void join(Context cxt) throws DataAccessException, AlreadyTakenException, UnauthorizedAccessException {
         gs.joinGame(getBodyObject(cxt, JoinRequest.class));
+        cxt.status(200);
     }
 
     private static <T> T getBodyObject(Context context, Class<T> clazz) {
