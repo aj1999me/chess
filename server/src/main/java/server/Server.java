@@ -72,19 +72,28 @@ public class Server {
     }
 
     private void list(Context cxt) throws UnauthorizedAccessException {
-        ListResult result = gs.listGames(getBodyObject(cxt, ListRequest.class));
+        if (!db.checkAuth(cxt.header("authorization"))) {
+            throw new UnauthorizedAccessException("unauthorized access");
+        }
+        ListResult result = gs.listGames();
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
     }
 
     private void create(Context cxt) throws UnauthorizedAccessException, AlreadyTakenException {
+        if (!db.checkAuth(cxt.header("authorization"))) {
+            throw new UnauthorizedAccessException("unauthorized access");
+        }
         MakeGameResult result = gs.makeGame(getBodyObject(cxt, MakeGameRequest.class));
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
     }
 
     private void join(Context cxt) throws DataAccessException, AlreadyTakenException, UnauthorizedAccessException {
-        gs.joinGame(getBodyObject(cxt, JoinRequest.class));
+        if (!db.checkAuth(cxt.header("authorization"))) {
+            throw new UnauthorizedAccessException("unauthorized access");
+        }
+        gs.joinGame(getBodyObject(cxt, JoinRequest.class), cxt.header("authorization"));
         cxt.status(200);
     }
 

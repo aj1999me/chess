@@ -2,4 +2,4 @@ package service;
 
 import server.Server.UserColor;
 
-public record JoinRequest(String authToken, int gameID, UserColor color) {}
+public record JoinRequest(int gameID, UserColor color) {}
