@@ -81,7 +81,7 @@ public class Server {
         cxt.result(new Gson().toJson(result));
     }
 
-    private void create(Context cxt) throws UnauthorizedAccessException, AlreadyTakenException {
+    private void create(Context cxt) throws BadRequestException, UnauthorizedAccessException, AlreadyTakenException {
         if (!db.checkAuth(cxt.header("authorization"))) {
             throw new UnauthorizedAccessException("unauthorized access");
         }
@@ -90,7 +90,7 @@ public class Server {
         cxt.result(new Gson().toJson(result));
     }
 
-    private void join(Context cxt) throws DataAccessException, AlreadyTakenException, UnauthorizedAccessException {
+    private void join(Context cxt) throws BadRequestException, DataAccessException, AlreadyTakenException, UnauthorizedAccessException {
         if (!db.checkAuth(cxt.header("authorization"))) {
             throw new UnauthorizedAccessException("unauthorized access");
         }
