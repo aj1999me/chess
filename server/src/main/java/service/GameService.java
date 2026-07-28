@@ -28,7 +28,7 @@ public class GameService {
         return new MakeGameResult(gameID);
     }
     public void joinGame(JoinRequest req, String authToken) throws BadRequestException, DataAccessException, AlreadyTakenException {
-        if (req.playerColor() == null) {
+        if (req.playerColor() == null || req.gameID() == null) {
             throw new BadRequestException("missing information");
         }
         if (db.getGame(req.gameID()) == null) {

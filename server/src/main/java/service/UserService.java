@@ -39,8 +39,8 @@ public class UserService {
             throw new UnauthorizedAccessException("wrong password");
         }
         String auth = generateToken();
-        db.addAuth(new authData(req.username(), auth));
-        return new LoginResult(req.username(), auth);
+        db.addAuth(new authData(auth, req.username()));
+        return new LoginResult(auth, req.username());
     }
     public void logout(String token) {
         db.removeAuth(token);
