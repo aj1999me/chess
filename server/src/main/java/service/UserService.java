@@ -52,4 +52,8 @@ public class UserService {
     public void clear() {
         db.clear();
     }
+
+    public Database getDb() {
+        return db;
+    }
 }
