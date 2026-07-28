@@ -76,4 +76,8 @@ public class Database implements DataModel {
         userDB.clear();
         gameDB.clear();
     }
+
+    public boolean isEmpty() {
+        return authDB.isEmpty() && userDB.isEmpty() && gameDB.isEmpty();
+    }
 }

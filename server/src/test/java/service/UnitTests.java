@@ -210,4 +210,19 @@ public class UnitTests {
             throw new AssertionError("threw wrong exception");
         }
     }
+    @Test
+    public void goodClear() {
+        var service = new UserService();
+        var gs = new GameService(service.getDb());
+        var req1 = new RegisterRequest("Userino", "Passu", "bungees@munga.com");
+        try {
+            service.register(req1);
+            var req2 = new MakeGameRequest("stuff");
+            gs.makeGame(req2);
+        } catch(Exception e) {
+            throw new AssertionError("failed to register or make game");
+        }
+        service.clear();
+        assert service.getDb().isEmpty();
+    }
 }
