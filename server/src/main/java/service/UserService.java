@@ -36,7 +36,7 @@ public class UserService {
         }
         UserData user = db.getUser(req.username());
         if (user == null) {
-            throw new BadRequestException("user does not exist");
+            throw new UnauthorizedAccessException("user does not exist");
         }
         if (!user.password().equals(req.password())) {
             throw new UnauthorizedAccessException("wrong password");
