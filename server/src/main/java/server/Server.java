@@ -110,8 +110,4 @@ public class Server {
         cxt.json(body);
     }
 
-    private boolean authorize(String token) {
-        return db.checkAuth(token);
-    }
-
 }

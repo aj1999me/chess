@@ -20,8 +20,9 @@ public class UserService {
             throw new AlreadyTakenException("username already taken");
         }
         db.createUser(new userData(req.username(), req.password(), req.email()));
-        db.addAuth(new authData(generateToken(), req.username()));
-        return new RegisterResult(req.username(), generateToken());
+        String token = generateToken();
+        db.addAuth(new authData(token, req.username()));
+        return new RegisterResult(req.username(), token);
     }
     public LoginResult login(LoginRequest req) throws UnauthorizedAccessException {
         userData user = db.getUser(req.username());
