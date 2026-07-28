@@ -1,11 +1,11 @@
 package dataaccess;
 
-import model.authData;
-import model.gameData;
-import model.userData;
+import model.*;
 import java.util.Collection;
 import java.util.TreeMap;
-import server.Server.UserColor;
+import chess.ChessGame.TeamColor;
+import service.ListEntry;
+import java.util.ArrayList;
 
 public class database implements dataModel {
     private TreeMap<String, userData> userDB;
@@ -36,8 +36,12 @@ public class database implements dataModel {
     public authData getAuth(String authToken) {
         return authDB.get(authToken);
     }
-    public Collection<gameData> getList() {
-        return gameDB.values();
+    public Collection<ListEntry> getList() {
+        var list = new ArrayList<ListEntry>();
+        for (var gameData : gameDB.values()) {
+            list.add(new ListEntry(gameData));
+        }
+        return list;
     }
     public void addGame(gameData game) {
         gameDB.put(game.gameID(), game);
@@ -45,11 +49,11 @@ public class database implements dataModel {
     public gameData getGame(int gameID) {
         return gameDB.get(gameID);
     }
-    public void updatePlayer(int gameID, UserColor color, String username) {
+    public void updatePlayer(int gameID, TeamColor color, String username) {
         gameData game = gameDB.get(gameID);
         gameDB.remove(gameID);
         gameData updated;
-        if (color == UserColor.WHITE) {
+        if (color == TeamColor.WHITE) {
             updated = new gameData(gameID,
                     username, game.blackUsername(),
                     game.gameName(), game.game());
@@ -60,8 +64,8 @@ public class database implements dataModel {
         }
         gameDB.put(gameID, updated);
     }
-    public boolean checkColor(int gameID, UserColor color) {
-        if (color == UserColor.WHITE) {
+    public boolean checkColor(int gameID, TeamColor color) {
+        if (color == TeamColor.WHITE) {
             return gameDB.get(gameID).whiteUsername() == null;
         }
         return gameDB.get(gameID).blackUsername() == null;

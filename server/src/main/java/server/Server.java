@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import com.google.gson.Gson;
 import java.util.Map;
 
+
 public class Server {
 
     private final Javalin javalin;
@@ -44,8 +45,6 @@ public class Server {
     public void stop() {
         javalin.stop();
     }
-
-    public enum UserColor {WHITE, BLACK}
 
     private void register(Context cxt) throws BadRequestException, AlreadyTakenException  {
         RegisterResult result = us.register(getBodyObject(cxt, RegisterRequest.class));

@@ -20,7 +20,7 @@ public class GameService {
         if (req.gameName() == null) {
             throw new BadRequestException("missing game name");
         }
-        if (db.getGame(req.gameName().hashCode()) != null) {
+        if (db.getGame(Math.abs(req.gameName().hashCode())) != null) {
             throw new AlreadyTakenException("game already exists");
         }
         int gameID = Math.abs(req.gameName().hashCode());
@@ -28,15 +28,15 @@ public class GameService {
         return new MakeGameResult(gameID);
     }
     public void joinGame(JoinRequest req, String authToken) throws BadRequestException, DataAccessException, AlreadyTakenException {
-        if (req.color() == null) {
+        if (req.playerColor() == null) {
             throw new BadRequestException("missing information");
         }
         if (db.getGame(req.gameID()) == null) {
             throw new DataAccessException("game does not exist");
         }
-        if (!db.checkColor(req.gameID(), req.color())) {
+        if (!db.checkColor(req.gameID(), req.playerColor())) {
             throw new AlreadyTakenException("color already taken");
         }
-        db.updatePlayer(req.gameID(), req.color(), db.getAuth(authToken).username());
+        db.updatePlayer(req.gameID(), req.playerColor(), db.getAuth(authToken).username());
     }
 }

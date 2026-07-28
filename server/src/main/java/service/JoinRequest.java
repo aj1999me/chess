@@ -1,5 +1,5 @@
 package service;
 
-import server.Server.UserColor;
+import chess.ChessGame.TeamColor;
 
-public record JoinRequest(int gameID, UserColor color) {}
+public record JoinRequest(TeamColor playerColor, int gameID) {}
