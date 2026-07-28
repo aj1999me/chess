@@ -29,7 +29,8 @@ public class Server {
                 .put("/game", this::join)
                 .exception(AlreadyTakenException.class, this::ATexceptionHandler)
                 .exception(DataAccessException.class, this::DAexceptionHandler)
-                .exception(UnauthorizedAccessException.class, this::UAexceptionHandler);
+                .exception(UnauthorizedAccessException.class, this::UAexceptionHandler)
+                .exception(BadRequestException.class, this::BRexceptionHandler);
 
         // Register your endpoints and exception handlers here.
 
@@ -46,13 +47,13 @@ public class Server {
 
     public enum UserColor {WHITE, BLACK}
 
-    private void register(Context cxt) throws AlreadyTakenException  {
+    private void register(Context cxt) throws BadRequestException, AlreadyTakenException  {
         RegisterResult result = us.register(getBodyObject(cxt, RegisterRequest.class));
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
     }
 
-    private void login(Context cxt) throws UnauthorizedAccessException {
+    private void login(Context cxt) throws BadRequestException, UnauthorizedAccessException {
         LoginResult result = us.login(getBodyObject(cxt, LoginRequest.class));
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
@@ -104,19 +105,24 @@ public class Server {
     private void ATexceptionHandler(AlreadyTakenException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(403);
-        cxt.json(body);
+        cxt.result(body);
     }
 
     private void DAexceptionHandler(DataAccessException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(500);
-        cxt.json(body);
+        cxt.result(body);
     }
 
     private void UAexceptionHandler(UnauthorizedAccessException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(401);
-        cxt.json(body);
+        cxt.result(body);
     }
 
+    private void BRexceptionHandler(BadRequestException e, Context cxt) {
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
+        cxt.status(400);
+        cxt.result(body);
+    }
 }

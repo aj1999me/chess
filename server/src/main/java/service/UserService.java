@@ -15,7 +15,10 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public RegisterResult register(RegisterRequest req) throws AlreadyTakenException {
+    public RegisterResult register(RegisterRequest req) throws BadRequestException, AlreadyTakenException {
+        if (req.username() == null || req.password() == null) {
+            throw new BadRequestException("username missing");
+        }
         if (db.getUser(req.username()) != null) {
             throw new AlreadyTakenException("username already taken");
         }
@@ -24,7 +27,10 @@ public class UserService {
         db.addAuth(new authData(token, req.username()));
         return new RegisterResult(req.username(), token);
     }
-    public LoginResult login(LoginRequest req) throws UnauthorizedAccessException {
+    public LoginResult login(LoginRequest req) throws UnauthorizedAccessException, BadRequestException {
+        if (req.username() == null || req.password() == null) {
+            throw new BadRequestException("username missing");
+        }
         userData user = db.getUser(req.username());
         if (user == null) {
             throw new UnauthorizedAccessException("user does not exist");
