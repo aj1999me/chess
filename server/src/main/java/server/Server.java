@@ -1,10 +1,7 @@
 package server;
 
-import dataaccess.AlreadyTakenException;
-import dataaccess.DataAccessException;
-import dataaccess.UnauthorizedAccessException;
 import io.javalin.*;
-import dataaccess.database;
+import dataaccess.*;
 import model.*;
 import service.*;
 import io.javalin.http.Context;
@@ -62,7 +59,10 @@ public class Server {
     }
 
     private void logout(Context cxt) throws UnauthorizedAccessException{
-        us.logout(getBodyObject(cxt, LogoutRequest.class));
+        if (!db.checkAuth(cxt.header("authorization"))){
+            throw new UnauthorizedAccessException("unauthorized access");
+        }
+        us.logout(cxt.header("authorization"));
         cxt.status(200);
     }
 
@@ -108,6 +108,10 @@ public class Server {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(401);
         cxt.json(body);
+    }
+
+    private boolean authorize(String token) {
+        return db.checkAuth(token);
     }
 
 }

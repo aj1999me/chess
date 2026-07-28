@@ -28,14 +28,12 @@ public class UserService {
         if (!user.password().equals(req.password())) {
             throw new UnauthorizedAccessException("wrong password");
         }
-
-        return new LoginResult(req.username(), generateToken());
+        String auth = generateToken();
+        db.addAuth(new authData(req.username(), auth));
+        return new LoginResult(req.username(), auth);
     }
-    public void logout(LogoutRequest req) throws UnauthorizedAccessException {
-        if (!db.checkAuth(req.authToken())) {
-            throw new UnauthorizedAccessException("unauthorized");
-        }
-        db.removeAuth(req.authToken());
+    public void logout(String token) {
+        db.removeAuth(token);
     }
 
     public void clear() {
