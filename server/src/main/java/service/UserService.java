@@ -26,6 +26,9 @@ public class UserService {
     }
     public LoginResult login(LoginRequest req) throws UnauthorizedAccessException {
         userData user = db.getUser(req.username());
+        if (user == null) {
+            throw new UnauthorizedAccessException("user does not exist");
+        }
         if (!user.password().equals(req.password())) {
             throw new UnauthorizedAccessException("wrong password");
         }
