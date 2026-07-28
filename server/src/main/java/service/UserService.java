@@ -7,6 +7,9 @@ import model.*;
 public class UserService {
     private Database db;
 
+    public UserService() {
+        db = new Database();
+    }
     public UserService(Database db) {
         this.db = db;
     }
@@ -33,7 +36,7 @@ public class UserService {
         }
         UserData user = db.getUser(req.username());
         if (user == null) {
-            throw new UnauthorizedAccessException("user does not exist");
+            throw new BadRequestException("user does not exist");
         }
         if (!user.password().equals(req.password())) {
             throw new UnauthorizedAccessException("wrong password");
