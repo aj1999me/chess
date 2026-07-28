@@ -6,9 +6,9 @@ import dataaccess.*;
 import java.lang.Math;
 
 public class GameService {
-    private database db;
+    private Database db;
 
-    public GameService(database db) {
+    public GameService(Database db) {
         this.db = db;
     }
 
@@ -24,7 +24,7 @@ public class GameService {
             throw new AlreadyTakenException("game already exists");
         }
         int gameID = Math.abs(req.gameName().hashCode());
-        db.addGame(new gameData(gameID, null, null, req.gameName(), new ChessGame()));
+        db.addGame(new GameData(gameID, null, null, req.gameName(), new ChessGame()));
         return new MakeGameResult(gameID);
     }
     public void joinGame(JoinRequest req, String authToken) throws BadRequestException, DataAccessException, AlreadyTakenException {

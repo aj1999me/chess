@@ -1,5 +1,5 @@
 package service;
-import model.gameData;
+import model.GameData;
 
 public class ListEntry {
 
@@ -8,7 +8,7 @@ public class ListEntry {
     private final String blackUsername;
     private final String gameName;
 
-    public ListEntry(gameData obj) {
+    public ListEntry(GameData obj) {
         this.gameID = obj.gameID();
         whiteUsername = obj.whiteUsername();
         blackUsername = obj.blackUsername();

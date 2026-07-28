@@ -1,32 +1,32 @@
 package dataaccess;
 
-import model.authData;
-import model.gameData;
-import model.userData;
+import model.AuthData;
+import model.GameData;
+import model.UserData;
 import chess.ChessGame.TeamColor;
 import service.ListEntry;
 
 import java.util.Collection;
 
-public interface dataModel {
+public interface DataModel {
 
-    public userData getUser(String username);
+    public UserData getUser(String username);
 
-    public void createUser(userData user);
+    public void createUser(UserData user);
 
-    public void addAuth(authData auth);
+    public void addAuth(AuthData auth);
 
     public void removeAuth(String authToken);
 
     public boolean checkAuth(String authToken);
 
-    public authData getAuth(String authToken);
+    public AuthData getAuth(String authToken);
 
     public Collection<ListEntry> getList();
 
-    public void addGame(gameData game);
+    public void addGame(GameData game);
 
-    public gameData getGame(int gameID);
+    public GameData getGame(int gameID);
 
     public void updatePlayer(int gameID, TeamColor color, String username);
 

@@ -2,7 +2,6 @@ package server;
 
 import io.javalin.*;
 import dataaccess.*;
-import model.*;
 import service.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
@@ -12,12 +11,12 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
-    private database db;
+    private Database db;
     private final UserService us;
     private final GameService gs;
 
     public Server() {
-        db = new database();
+        db = new Database();
         us = new UserService(db);
         gs = new GameService(db);
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
@@ -28,10 +27,10 @@ public class Server {
                 .get("/game", this::list)
                 .post("/game", this::create)
                 .put("/game", this::join)
-                .exception(AlreadyTakenException.class, this::ATexceptionHandler)
-                .exception(DataAccessException.class, this::DAexceptionHandler)
-                .exception(UnauthorizedAccessException.class, this::UAexceptionHandler)
-                .exception(BadRequestException.class, this::BRexceptionHandler);
+                .exception(AlreadyTakenException.class, this::atExceptionHandler)
+                .exception(DataAccessException.class, this::daExceptionHandler)
+                .exception(UnauthorizedAccessException.class, this::uaExceptionHandler)
+                .exception(BadRequestException.class, this::brExceptionHandler);
 
         // Register your endpoints and exception handlers here.
 
@@ -101,25 +100,25 @@ public class Server {
         return new Gson().fromJson(context.body(), clazz);
     }
 
-    private void ATexceptionHandler(AlreadyTakenException e, Context cxt) {
+    private void atExceptionHandler(AlreadyTakenException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(403);
         cxt.result(body);
     }
 
-    private void DAexceptionHandler(DataAccessException e, Context cxt) {
+    private void daExceptionHandler(DataAccessException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(500);
         cxt.result(body);
     }
 
-    private void UAexceptionHandler(UnauthorizedAccessException e, Context cxt) {
+    private void uaExceptionHandler(UnauthorizedAccessException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(401);
         cxt.result(body);
     }
 
-    private void BRexceptionHandler(BadRequestException e, Context cxt) {
+    private void brExceptionHandler(BadRequestException e, Context cxt) {
         var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage())));
         cxt.status(400);
         cxt.result(body);

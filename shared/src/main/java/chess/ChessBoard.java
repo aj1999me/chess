@@ -12,7 +12,7 @@ public class ChessBoard {
     protected ChessMap pieces = new ChessMap();
     protected ChessPosition whiteKingSquare;
     protected ChessPosition blackKingSquare;
-    private final static int[][] defaultBoard = {/*white king*/{1,5,0,0},
+    private final static int[][] DEFAULT_BOARD = {/*white king*/{1,5,0,0},
             /*black king*/{8,5,1,0}, /*white queen*/{1,4,0,1},
             /*black queen*/{8,4,1,1}, /*white rooks*/{1,1,0,2}, {1,8,0,2},
             /*black rooks*/{8,1,1,2}, {8,8,1,2}, /*white bishops*/{1,3,0,3},
@@ -79,7 +79,7 @@ public class ChessBoard {
     }
 
     public void resetBoard() {
-        for (var info : defaultBoard) {
+        for (var info : DEFAULT_BOARD) {
             addPiece(new ChessPosition(info[0],info[1]), new ChessPiece(info[2], info[3]));
         }
     }

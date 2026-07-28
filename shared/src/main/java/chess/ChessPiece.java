@@ -13,12 +13,12 @@ import java.util.ArrayList;
 public class ChessPiece {
     private PieceType type;
     private ChessGame.TeamColor color;
-    private static final int[][] kingMoves = {{1,-1},  {1,0},  {1,1},
+    private static final int[][] KING_MOVES = {{1,-1},  {1,0},  {1,1},
             {0,-1},          {0,1},
             {-1,-1}, {-1,0}, {-1,1}};
-    private static final int[][] rookMoves = {{1,0}, {0,1}, {-1,0}, {0,-1}};
-    private static final int[][] bishopMoves = {{1,1}, {1,-1}, {-1,-1}, {-1,1}};
-    private static final int[][] knightMoves = {{1,2}, {2,1}, {2,-1},
+    private static final int[][] ROOK_MOVES = {{1,0}, {0,1}, {-1,0}, {0,-1}};
+    private static final int[][] BISHOP_MOVES = {{1,1}, {1,-1}, {-1,-1}, {-1,1}};
+    private static final int[][] KNIGHT_MOVES = {{1,2}, {2,1}, {2,-1},
             {1,-2}, {-1,-2}, {-2,-1}, {-2,1}, {-1,2}};
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
@@ -88,7 +88,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if (type == PieceType.KING) {
-            for (var dir : kingMoves) {
+            for (var dir : KING_MOVES) {
                 int row = myPosition.getRow() + dir[0];
                 int col = myPosition.getColumn() + dir[1];
                 ChessPosition dest = new ChessPosition(row, col);
@@ -97,7 +97,7 @@ public class ChessPiece {
                 }
             }
         } else if (type == PieceType.KNIGHT) {
-            for (var dir : knightMoves) {
+            for (var dir : KNIGHT_MOVES) {
                 int row = myPosition.getRow() + dir[0];
                 int col = myPosition.getColumn() + dir[1];
                 ChessPosition dest = new ChessPosition(row, col);
@@ -106,7 +106,7 @@ public class ChessPiece {
                 }
             }
         } else if (type == PieceType.QUEEN) {
-            for (var dir : kingMoves) {
+            for (var dir : KING_MOVES) {
                 int row = myPosition.getRow() + dir[0];
                 int col = myPosition.getColumn() + dir[1];
                 ChessPosition dest = new ChessPosition(row, col);
@@ -126,7 +126,7 @@ public class ChessPiece {
                 }
             }
         } else if (type == PieceType.ROOK) {
-            for (var dir : rookMoves) {
+            for (var dir : ROOK_MOVES) {
                 int row = myPosition.getRow() + dir[0];
                 int col = myPosition.getColumn() + dir[1];
                 ChessPosition dest = new ChessPosition(row, col);
@@ -146,7 +146,7 @@ public class ChessPiece {
                 }
             }
         } else if (type == PieceType.BISHOP) {
-            for (var dir : bishopMoves) {
+            for (var dir : BISHOP_MOVES) {
                 int row = myPosition.getRow() + dir[0];
                 int col = myPosition.getColumn() + dir[1];
                 ChessPosition dest = new ChessPosition(row, col);

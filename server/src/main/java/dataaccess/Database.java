@@ -7,24 +7,24 @@ import chess.ChessGame.TeamColor;
 import service.ListEntry;
 import java.util.ArrayList;
 
-public class database implements dataModel {
-    private TreeMap<String, userData> userDB;
-    private TreeMap<String, authData> authDB;
-    private TreeMap<Integer, gameData> gameDB;
+public class Database implements DataModel {
+    private TreeMap<String, UserData> userDB;
+    private TreeMap<String, AuthData> authDB;
+    private TreeMap<Integer, GameData> gameDB;
 
-    public database() {
+    public Database() {
         userDB = new TreeMap<>();
         authDB = new TreeMap<>();
         gameDB = new TreeMap<>();
     }
 
-    public userData getUser(String username) {
+    public UserData getUser(String username) {
         return userDB.get(username);
     }
-    public void createUser(userData user) {
+    public void createUser(UserData user) {
         userDB.put(user.username(), user);
     }
-    public void addAuth(authData auth) {
+    public void addAuth(AuthData auth) {
         authDB.put(auth.authToken(), auth);
     }
     public void removeAuth(String authToken) {
@@ -33,7 +33,7 @@ public class database implements dataModel {
     public boolean checkAuth(String authToken) {
         return authDB.containsKey(authToken);
     }
-    public authData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) {
         return authDB.get(authToken);
     }
     public Collection<ListEntry> getList() {
@@ -43,22 +43,22 @@ public class database implements dataModel {
         }
         return list;
     }
-    public void addGame(gameData game) {
+    public void addGame(GameData game) {
         gameDB.put(game.gameID(), game);
     }
-    public gameData getGame(int gameID) {
+    public GameData getGame(int gameID) {
         return gameDB.get(gameID);
     }
     public void updatePlayer(int gameID, TeamColor color, String username) {
-        gameData game = gameDB.get(gameID);
+        GameData game = gameDB.get(gameID);
         gameDB.remove(gameID);
-        gameData updated;
+        GameData updated;
         if (color == TeamColor.WHITE) {
-            updated = new gameData(gameID,
+            updated = new GameData(gameID,
                     username, game.blackUsername(),
                     game.gameName(), game.game());
         } else {
-            updated = new gameData(gameID,
+            updated = new GameData(gameID,
                     game.whiteUsername(), username,
                     game.gameName(), game.game());
         }
