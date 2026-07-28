@@ -86,6 +86,17 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
 
+    private void goClose(ChessBoard board, ChessPosition myPosition, int[][] directions, Collection<ChessMove> moves) {
+        for (var dir : directions) {
+            int row = myPosition.getRow() + dir[0];
+            int col = myPosition.getColumn() + dir[1];
+            ChessPosition dest = new ChessPosition(row, col);
+            if (row > 0 && row < 9 && col > 0 && col < 9 && (board.getPiece(dest) == null || board.getPiece(dest).getTeamColor() != color)) {
+                moves.add(new ChessMove(myPosition, dest));
+            }
+        }
+    }
+
     private void goFar(ChessBoard board, ChessPosition myPosition, int[][] directions, Collection<ChessMove> moves) {
         for (var dir : directions) {
             int row = myPosition.getRow() + dir[0];
@@ -167,23 +178,9 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if (type == PieceType.KING) {
-            for (var dir : KING_MOVES) {
-                int row = myPosition.getRow() + dir[0];
-                int col = myPosition.getColumn() + dir[1];
-                ChessPosition dest = new ChessPosition(row, col);
-                if (row > 0 && row < 9 && col > 0 && col < 9 && (board.getPiece(dest) == null || board.getPiece(dest).getTeamColor() != color)) {
-                    moves.add(new ChessMove(myPosition, dest));
-                }
-            }
+            goClose(board, myPosition, KING_MOVES, moves);
         } else if (type == PieceType.KNIGHT) {
-            for (var dir : KNIGHT_MOVES) {
-                int row = myPosition.getRow() + dir[0];
-                int col = myPosition.getColumn() + dir[1];
-                ChessPosition dest = new ChessPosition(row, col);
-                if (row > 0 && row < 9 && col > 0 && col < 9 && (board.getPiece(dest) == null || board.getPiece(dest).getTeamColor() != color)) {
-                    moves.add(new ChessMove(myPosition, dest));
-                }
-            }
+            goClose(board, myPosition, KNIGHT_MOVES, moves);
         } else if (type == PieceType.QUEEN) {
             goFar(board, myPosition, KING_MOVES, moves);
         } else if (type == PieceType.ROOK) {
