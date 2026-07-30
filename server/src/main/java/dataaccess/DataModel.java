@@ -10,15 +10,15 @@ import java.util.Collection;
 
 public interface DataModel {
 
-    public UserData getUser(String username);
+    public UserData getUser(String username) throws DataAccessException;
 
-    public void createUser(UserData user);
+    public void createUser(UserData user) throws DataAccessException;
 
-    public void addAuth(AuthData auth);
+    public void addAuth(AuthData auth) throws DataAccessException;
 
-    public void removeAuth(String authToken);
+    public void removeAuth(String authToken) throws DataAccessException;
 
-    public boolean checkAuth(String authToken);
+    public boolean checkAuth(String authToken) throws DataAccessException;
 
     public AuthData getAuth(String authToken);
 
@@ -31,4 +31,6 @@ public interface DataModel {
     public void updatePlayer(int gameID, TeamColor color, String username);
 
     public boolean checkColor(int gameID, TeamColor color);
+
+    public void clear() throws DataAccessException;
 }

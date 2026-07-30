@@ -21,7 +21,7 @@ public class Database implements DataModel {
     public UserData getUser(String username) {
         return userDB.get(username);
     }
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws DataAccessException {
         userDB.put(user.username(), user);
     }
     public void addAuth(AuthData auth) {

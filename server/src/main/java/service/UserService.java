@@ -18,19 +18,23 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public RegisterResult register(RegisterRequest req) throws BadRequestException, AlreadyTakenException {
+    public RegisterResult register(RegisterRequest req) throws BadRequestException, AlreadyTakenException, DataAccessException {
         if (req.username() == null || req.password() == null) {
             throw new BadRequestException("username missing");
         }
         if (db.getUser(req.username()) != null) {
             throw new AlreadyTakenException("username already taken");
         }
-        db.createUser(new UserData(req.username(), req.password(), req.email()));
+        try {
+            db.createUser(new UserData(req.username(), req.password(), req.email()));
+        } catch(DataAccessException e) {
+            throw new BadRequestException(e.getMessage());
+        }
         String token = generateToken();
         db.addAuth(new AuthData(token, req.username()));
         return new RegisterResult(req.username(), token);
     }
-    public LoginResult login(LoginRequest req) throws UnauthorizedAccessException, BadRequestException {
+    public LoginResult login(LoginRequest req) throws UnauthorizedAccessException, BadRequestException, DataAccessException {
         if (req.username() == null || req.password() == null) {
             throw new BadRequestException("username missing");
         }
@@ -49,7 +53,7 @@ public class UserService {
         db.removeAuth(token);
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         db.clear();
     }
 

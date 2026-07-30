@@ -45,19 +45,19 @@ public class Server {
         javalin.stop();
     }
 
-    private void register(Context cxt) throws BadRequestException, AlreadyTakenException  {
+    private void register(Context cxt) throws BadRequestException, AlreadyTakenException, DataAccessException  {
         RegisterResult result = us.register(getBodyObject(cxt, RegisterRequest.class));
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
     }
 
-    private void login(Context cxt) throws BadRequestException, UnauthorizedAccessException {
+    private void login(Context cxt) throws BadRequestException, UnauthorizedAccessException, DataAccessException {
         LoginResult result = us.login(getBodyObject(cxt, LoginRequest.class));
         cxt.status(200);
         cxt.result(new Gson().toJson(result));
     }
 
-    private void logout(Context cxt) throws UnauthorizedAccessException{
+    private void logout(Context cxt) throws DataAccessException, UnauthorizedAccessException{
         if (!db.checkAuth(cxt.header("authorization"))){
             throw new UnauthorizedAccessException("unauthorized access");
         }
@@ -65,7 +65,7 @@ public class Server {
         cxt.status(200);
     }
 
-    private void clear(Context cxt) {
+    private void clear(Context cxt) throws DataAccessException {
         us.clear();
         cxt.status(200);
     }
