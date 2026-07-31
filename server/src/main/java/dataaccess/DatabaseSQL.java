@@ -11,11 +11,11 @@ import java.util.Collection;
 
 public class DatabaseSQL implements DataModel {
     public DatabaseSQL() throws DataAccessException {
-        try (var conn = getConnection()) {
-            var prep = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS db");
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "MungaBunga123")) {
+            var prep = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess");
             prep.executeUpdate();
 
-            conn.setCatalog("db");
+            conn.setCatalog("chess");
 
             var createUserDB = """
             CREATE TABLE  IF NOT EXISTS userDB (
@@ -32,7 +32,7 @@ public class DatabaseSQL implements DataModel {
             }
 
             var createAuthDB = """
-            CREATE TABLE  IF NOT EXISTS userDB (
+            CREATE TABLE  IF NOT EXISTS authDB (
                 id INT NOT NULL AUTO_INCREMENT,
                 authToken VARCHAR(255) NOT NULL,
                 username VARCHAR(255) NOT NULL,
@@ -45,7 +45,7 @@ public class DatabaseSQL implements DataModel {
             }
 
             var createGameDB = """
-            CREATE TABLE  IF NOT EXISTS userDB (
+            CREATE TABLE  IF NOT EXISTS gameDB (
                 id INT NOT NULL AUTO_INCREMENT,
                 gameID INT NOT NULL,
                 whiteUsername VARCHAR(255) DEFAULT NULL,
@@ -69,11 +69,13 @@ public class DatabaseSQL implements DataModel {
             try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM userDB WHERE username=?")) {
                 preparedStatement.setString(1, username);
                 try (var rs = preparedStatement.executeQuery()) {
-                    var name = rs.getString("username");
-                    var hashedPass = rs.getString("password");
-                    var email = rs.getString("email");
+                    if (rs.next()) {
+                        var hashedPass = rs.getString("password");
+                        var email = rs.getString("email");
 
-                    return new UserData(name, hashedPass, email);
+                        return new UserData(username, hashedPass, email);
+                    }
+                    return null;
                 }
             }
         } catch(SQLException e) {
@@ -96,7 +98,7 @@ public class DatabaseSQL implements DataModel {
 
     public void addAuth(AuthData auth) throws DataAccessException {
         try(var conn = getConnection()) {
-            try(var preppedStatement = conn.prepareStatement("INSERT INTO userDB (authToken, username) VALUES(?,?,?)")) {
+            try(var preppedStatement = conn.prepareStatement("INSERT INTO authDB (authToken, username) VALUES(?,?)")) {
                 preppedStatement.setString(1, auth.authToken());
                 preppedStatement.setString(2, auth.username()); // add hashing functionality
                 preppedStatement.executeUpdate();
