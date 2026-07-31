@@ -24,13 +24,11 @@ public interface DataModel {
 
     public Collection<ListEntry> getList();
 
-    public void addGame(GameData game);
+    public void addGame(GameData game) throws DataAccessException;
 
-    public GameData getGame(int gameID);
+    public GameData getGame(int gameID) throws DataAccessException;
 
-    public void updatePlayer(int gameID, TeamColor color, String username);
-
-    public boolean checkColor(int gameID, TeamColor color) throws DataAccessException;
+    public void updatePlayer(int gameID, TeamColor color, String username) throws DataAccessException, AlreadyTakenException;
 
     public void clear() throws DataAccessException;
 }

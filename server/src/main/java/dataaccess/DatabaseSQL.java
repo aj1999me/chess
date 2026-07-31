@@ -3,6 +3,7 @@ import chess.ChessGame;
 import model.*;
 import service.ListEntry;
 import static dataaccess.DatabaseManager.*;
+import com.google.gson.Gson;
 
 import java.sql.*;
 import java.util.Collection;
@@ -137,7 +138,7 @@ public class DatabaseSQL implements DataModel {
                     var user = rs.getString("username");
                     return new AuthData(token, user);
                 }
-                throw new DataAccessException("no authorization data found");
+                return null;
             }
         } catch(SQLException e) {
             throw new DataAccessException(e.getMessage());
@@ -146,11 +147,74 @@ public class DatabaseSQL implements DataModel {
 
     public Collection<ListEntry> getList();
 
-    public void addGame(GameData game);
+    public void addGame(GameData game) throws DataAccessException {
+        try(var conn = getConnection()) {
+            try(var prep = conn.prepareStatement("INSERT INTO gameDB (gameID, gameName, game) VALUES(?,?,?)")) {
+                prep.setInt(1, game.gameID());
+                prep.setString(2, game.gameName());
+                var json = new Gson().toJson(game.game());
+                prep.setString(3, json);
+                prep.executeUpdate();
+            }
+        } catch(SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 
-    public GameData getGame(int gameID);
+    public GameData getGame(int gameID) throws DataAccessException {
+        try(var conn = getConnection()) {
+            try(var prep = conn.prepareStatement("SELECT FROM gameDB WHERE gameID=?")) {
+                prep.setInt(1, gameID);
+                var rs = prep.executeQuery();
+                if (rs.next()) {
+                    var white = rs.getString("whiteUsername");
+                    var black = rs.getString("blackUsername");
+                    var name = rs.getString("gameName");
+                    var game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                    return new GameData(gameID, white,black, name, game);
+                }
+                return null;
+            }
+        } catch(SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 
-    public void updatePlayer(int gameID, ChessGame.TeamColor color, String username);
+    public void removeGame(int gameID) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var prep = conn.prepareStatement("DELETE FROM gameDB WHERE gameID=?")) {
+                prep.setInt(1, gameID);
+                prep.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException, AlreadyTakenException {
+        var game = getGame(gameID);
+        if (game == null) {
+            throw new DataAccessException("game does not exist");
+        }
+        removeGame(gameID);
+        GameData updated;
+        if (color == ChessGame.TeamColor.WHITE) {
+            if (game.whiteUsername() != null) {
+                throw new AlreadyTakenException("color already taken");
+            }
+            updated = new GameData(gameID,
+                    username, game.blackUsername(),
+                    game.gameName(), game.game());
+        } else {
+            if (game.blackUsername() != null) {
+                throw new AlreadyTakenException("color already taken");
+            }
+            updated = new GameData(gameID,
+                    game.whiteUsername(), username,
+                    game.gameName(), game.game());
+        }
+        addGame(updated);
+    }
 
     public boolean checkColor(int gameID, ChessGame.TeamColor color) throws DataAccessException {
         try(var conn = getConnection()) {

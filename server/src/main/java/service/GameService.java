@@ -31,12 +31,13 @@ public class GameService {
         if (req.playerColor() == null || req.gameID() == null) {
             throw new BadRequestException("missing information");
         }
-        if (db.getGame(req.gameID()) == null) {
+        /*if (db.getGame(req.gameID()) == null) {
             throw new DataAccessException("game does not exist");
         }
         if (!db.checkColor(req.gameID(), req.playerColor())) {
             throw new AlreadyTakenException("color already taken");
-        }
+        }*/
+
         db.updatePlayer(req.gameID(), req.playerColor(), db.getAuth(authToken).username());
     }
 }
