@@ -20,7 +20,7 @@ public interface DataModel {
 
     public boolean checkAuth(String authToken) throws DataAccessException;
 
-    public AuthData getAuth(String authToken);
+    public AuthData getAuth(String authToken) throws DataAccessException;
 
     public Collection<ListEntry> getList();
 
@@ -30,7 +30,7 @@ public interface DataModel {
 
     public void updatePlayer(int gameID, TeamColor color, String username);
 
-    public boolean checkColor(int gameID, TeamColor color);
+    public boolean checkColor(int gameID, TeamColor color) throws DataAccessException;
 
     public void clear() throws DataAccessException;
 }

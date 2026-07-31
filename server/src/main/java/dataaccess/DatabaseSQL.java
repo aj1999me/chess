@@ -106,9 +106,10 @@ public class DatabaseSQL implements DataModel {
 
     public void removeAuth(String authToken) throws DataAccessException {
         try (var conn = getConnection()) {
-            var prep = conn.prepareStatement("DELETE FROM authDB WHERE authToken=?");
-            prep.setString(1, authToken);
-            prep.executeUpdate();
+            try (var prep = conn.prepareStatement("DELETE FROM authDB WHERE authToken=?")) {
+                prep.setString(1, authToken);
+                prep.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
@@ -116,16 +117,32 @@ public class DatabaseSQL implements DataModel {
 
     public boolean checkAuth(String authToken) throws DataAccessException {
         try(var conn = getConnection()) {
-            var prep = conn.prepareStatement("SELECT authToken FROM authDB WHERE authToken=?");
-            prep.setString(1, authToken);
-            var rs = prep.executeQuery();
-            return rs.next();
+            try(var prep = conn.prepareStatement("SELECT authToken FROM authDB WHERE authToken=?")) {
+                prep.setString(1, authToken);
+                var rs = prep.executeQuery();
+                return rs.next();
+            }
         } catch(SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }
 
-    public AuthData getAuth(String authToken);
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        try(var conn = getConnection()) {
+            try (var prep = conn.prepareStatement("SELECT authToken, username FROM authDB WHERE authToken=?")) {
+                prep.setString(1, authToken);
+                var rs = prep.executeQuery();
+                if (rs.next()) {
+                    var token = rs.getString("authToken");
+                    var user = rs.getString("username");
+                    return new AuthData(token, user);
+                }
+                throw new DataAccessException("no authorization data found");
+            }
+        } catch(SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 
     public Collection<ListEntry> getList();
 
@@ -135,7 +152,20 @@ public class DatabaseSQL implements DataModel {
 
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username);
 
-    public boolean checkColor(int gameID, ChessGame.TeamColor color);
+    public boolean checkColor(int gameID, ChessGame.TeamColor color) throws DataAccessException {
+        try(var conn = getConnection()) {
+            try(var prep = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername FROM gameDB WHERE gameID=?")) {
+                prep.setInt(1, gameID);
+                var rs = prep.executeQuery();
+                if (color == ChessGame.TeamColor.WHITE) {
+                    return rs.getString("whiteUsername") == null;
+                }
+                return rs.getString("blackUsername") == null;
+            }
+        } catch(Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
 
     public void clear() throws DataAccessException {
         try(var conn = getConnection()) {
