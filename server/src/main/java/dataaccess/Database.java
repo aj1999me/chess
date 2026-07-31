@@ -82,13 +82,6 @@ public class Database implements DataModel {
         gameDB.put(gameID, updated);
     }
 
-     public boolean checkColor(int gameID, TeamColor color) {
-        if (color == TeamColor.WHITE) {
-            return gameDB.get(gameID).whiteUsername() == null;
-        }
-        return gameDB.get(gameID).blackUsername() == null;
-    }
-
     public void clear() {
         authDB.clear();
         userDB.clear();

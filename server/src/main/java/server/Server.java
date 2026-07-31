@@ -70,7 +70,7 @@ public class Server {
         cxt.status(200);
     }
 
-    private void list(Context cxt) throws UnauthorizedAccessException {
+    private void list(Context cxt) throws UnauthorizedAccessException, DataAccessException {
         if (!db.checkAuth(cxt.header("authorization"))) {
             throw new UnauthorizedAccessException("unauthorized access");
         }

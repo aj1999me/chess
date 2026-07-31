@@ -49,7 +49,7 @@ public class UserService {
         db.addAuth(new AuthData(auth, req.username()));
         return new LoginResult(auth, req.username());
     }
-    public void logout(String token) {
+    public void logout(String token) throws DataAccessException {
         db.removeAuth(token);
     }
 

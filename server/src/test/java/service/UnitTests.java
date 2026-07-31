@@ -2,6 +2,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.AlreadyTakenException;
 import dataaccess.BadRequestException;
+import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedAccessException;
 import model.*;
 import org.junit.jupiter.api.*;
@@ -59,10 +60,10 @@ public class UnitTests {
         var req2 = new LoginRequest("ExistingUser", "WrongPassword");
         try {
             service.login(req2);
-        } catch(BadRequestException e) {
-            throw new AssertionError("threw wrong exception");
         } catch(UnauthorizedAccessException e) {
             assert true;
+        } catch(Exception e) {
+            throw new AssertionError("threw wrong exception");
         }
     }
 
@@ -105,8 +106,13 @@ public class UnitTests {
         } catch(Exception e) {
             throw new AssertionError("failed to register");
         }
-        ListResult res = gs.listGames();
-        assert res.games().isEmpty();
+        try {
+            ListResult res = gs.listGames();
+            assert res.games().isEmpty();
+        } catch(Exception e) {
+            throw new AssertionError("someting wong");
+        }
+
     }
 
     @Test
@@ -122,7 +128,11 @@ public class UnitTests {
             throw new AssertionError("failed to register or create game");
         }
         assert !service.getDb().checkAuth("ugwemugwemosas");
-        ListResult res = gs.listGames();
+        try {
+            ListResult res = gs.listGames();
+        } catch(Exception e) {
+            assert true;
+        }
     }
 
     @Test
@@ -222,7 +232,11 @@ public class UnitTests {
         } catch(Exception e) {
             throw new AssertionError("failed to register or make game");
         }
-        service.clear();
+        try {
+            service.clear();
+        } catch(Exception e) {
+            throw new AssertionError("bang ding ow");
+        }
         assert service.getDb().isEmpty();
     }
 }

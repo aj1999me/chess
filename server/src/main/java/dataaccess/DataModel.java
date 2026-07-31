@@ -22,7 +22,7 @@ public interface DataModel {
 
     public AuthData getAuth(String authToken) throws DataAccessException;
 
-    public Collection<ListEntry> getList();
+    public Collection<ListEntry> getList() throws DataAccessException;
 
     public void addGame(GameData game) throws DataAccessException;
 

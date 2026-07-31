@@ -4,6 +4,7 @@ import model.*;
 import service.ListEntry;
 import static dataaccess.DatabaseManager.*;
 import com.google.gson.Gson;
+import java.util.ArrayList;
 
 import java.sql.*;
 import java.util.Collection;
@@ -145,7 +146,24 @@ public class DatabaseSQL implements DataModel {
         }
     }
 
-    public Collection<ListEntry> getList();
+    public Collection<ListEntry> getList() throws DataAccessException {
+        var list = new ArrayList<ListEntry>();
+        try(var conn = getConnection()) {
+            try(var prep = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName FROM gameDB")) {
+                var rs = prep.executeQuery();
+                while(rs.next()) {
+                    var id = rs.getInt("gameID");
+                    var white = rs.getString("whiteUsername");
+                    var black = rs.getString("blackUsername");
+                    var name = rs.getString("gameName");
+                    list.add(new ListEntry(id, white, black, name));
+                }
+            }
+        } catch(SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return list;
+    }
 
     public void addGame(GameData game) throws DataAccessException {
         try(var conn = getConnection()) {
@@ -214,21 +232,6 @@ public class DatabaseSQL implements DataModel {
                     game.gameName(), game.game());
         }
         addGame(updated);
-    }
-
-    public boolean checkColor(int gameID, ChessGame.TeamColor color) throws DataAccessException {
-        try(var conn = getConnection()) {
-            try(var prep = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername FROM gameDB WHERE gameID=?")) {
-                prep.setInt(1, gameID);
-                var rs = prep.executeQuery();
-                if (color == ChessGame.TeamColor.WHITE) {
-                    return rs.getString("whiteUsername") == null;
-                }
-                return rs.getString("blackUsername") == null;
-            }
-        } catch(Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
     }
 
     public void clear() throws DataAccessException {

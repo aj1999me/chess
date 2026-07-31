@@ -14,4 +14,11 @@ public class ListEntry {
         blackUsername = obj.blackUsername();
         gameName = obj.gameName();
     }
+
+    public ListEntry(int gameID, String whiteUsername, String blackUsername, String gameName) {
+        this.gameID = gameID;
+        this.whiteUsername = whiteUsername;
+        this.blackUsername = blackUsername;
+        this.gameName = gameName;
+    }
 }

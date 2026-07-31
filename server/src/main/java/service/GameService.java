@@ -12,7 +12,7 @@ public class GameService {
         this.db = db;
     }
 
-    public ListResult listGames() {
+    public ListResult listGames() throws DataAccessException {
         return new ListResult(db.getList());
     }
 
