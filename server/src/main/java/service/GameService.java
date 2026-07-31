@@ -6,9 +6,9 @@ import dataaccess.*;
 import java.lang.Math;
 
 public class GameService {
-    private Database db;
+    private DatabaseSQL db;
 
-    public GameService(Database db) {
+    public GameService(DatabaseSQL db) {
         this.db = db;
     }
 
@@ -16,7 +16,7 @@ public class GameService {
         return new ListResult(db.getList());
     }
 
-    public MakeGameResult makeGame(MakeGameRequest req) throws BadRequestException, AlreadyTakenException {
+    public MakeGameResult makeGame(MakeGameRequest req) throws BadRequestException, AlreadyTakenException, DataAccessException {
         if (req.gameName() == null) {
             throw new BadRequestException("missing game name");
         }
@@ -27,17 +27,11 @@ public class GameService {
         db.addGame(new GameData(gameID, null, null, req.gameName(), new ChessGame()));
         return new MakeGameResult(gameID);
     }
+
     public void joinGame(JoinRequest req, String authToken) throws BadRequestException, DataAccessException, AlreadyTakenException {
         if (req.playerColor() == null || req.gameID() == null) {
             throw new BadRequestException("missing information");
         }
-        /*if (db.getGame(req.gameID()) == null) {
-            throw new DataAccessException("game does not exist");
-        }
-        if (!db.checkColor(req.gameID(), req.playerColor())) {
-            throw new AlreadyTakenException("color already taken");
-        }*/
-
         db.updatePlayer(req.gameID(), req.playerColor(), db.getAuth(authToken).username());
     }
 }

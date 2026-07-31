@@ -5,12 +5,12 @@ import dataaccess.*;
 import model.*;
 
 public class UserService {
-    private Database db;
+    private DatabaseSQL db;
 
-    public UserService() {
-        db = new Database();
+    public UserService() throws DataAccessException {
+        db = new DatabaseSQL();
     }
-    public UserService(Database db) {
+    public UserService(DatabaseSQL db) {
         this.db = db;
     }
 
@@ -57,7 +57,7 @@ public class UserService {
         db.clear();
     }
 
-    public Database getDb() {
+    public DatabaseSQL getDb() {
         return db;
     }
 }

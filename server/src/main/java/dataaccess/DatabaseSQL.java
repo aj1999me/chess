@@ -181,7 +181,7 @@ public class DatabaseSQL implements DataModel {
 
     public GameData getGame(int gameID) throws DataAccessException {
         try(var conn = getConnection()) {
-            try(var prep = conn.prepareStatement("SELECT FROM gameDB WHERE gameID=?")) {
+            try(var prep = conn.prepareStatement("SELECT * FROM gameDB WHERE gameID=?")) {
                 prep.setInt(1, gameID);
                 var rs = prep.executeQuery();
                 if (rs.next()) {
@@ -245,6 +245,29 @@ public class DatabaseSQL implements DataModel {
             try(var prep = conn.prepareStatement("TRUNCATE TABLE gameDB;")) {
                 prep.executeUpdate();
             }
+        } catch(SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public boolean isEmpty() throws DataAccessException{
+        boolean cond1;
+        boolean cond2;
+        boolean cond3;
+        try(var conn = getConnection()) {
+            try(var prep = conn.prepareStatement("SELECT * FROM userDB")){
+                var rs = prep.executeQuery();
+                cond1 = rs.next();
+            }
+            try(var prep = conn.prepareStatement("SELECT * FROM authDB")){
+                var rs = prep.executeQuery();
+                cond2 = rs.next();
+            }
+            try(var prep = conn.prepareStatement("SELECT * FROM gameDB")){
+                var rs = prep.executeQuery();
+                cond3 = rs.next();
+            }
+            return !cond1 && !cond2 && !cond3;
         } catch(SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

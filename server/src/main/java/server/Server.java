@@ -11,12 +11,16 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
-    private Database db;
+    private DatabaseSQL db;
     private final UserService us;
     private final GameService gs;
 
     public Server() {
-        db = new Database();
+        try {
+            db = new DatabaseSQL();
+        } catch(DataAccessException e) {
+            System.out.println("failed to initiate database");
+        }
         us = new UserService(db);
         gs = new GameService(db);
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
@@ -79,7 +83,7 @@ public class Server {
         cxt.result(new Gson().toJson(result));
     }
 
-    private void create(Context cxt) throws BadRequestException, UnauthorizedAccessException, AlreadyTakenException {
+    private void create(Context cxt) throws BadRequestException, UnauthorizedAccessException, AlreadyTakenException, DataAccessException {
         if (!db.checkAuth(cxt.header("authorization"))) {
             throw new UnauthorizedAccessException("unauthorized access");
         }
