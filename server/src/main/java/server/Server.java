@@ -127,4 +127,8 @@ public class Server {
         cxt.status(400);
         cxt.result(body);
     }
+
+    public DatabaseSQL getDb() {
+        return db;
+    }
 }
