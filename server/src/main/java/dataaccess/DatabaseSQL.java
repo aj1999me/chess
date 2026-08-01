@@ -4,6 +4,7 @@ import model.*;
 import service.ListEntry;
 import static dataaccess.DatabaseManager.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 
 import java.sql.*;
@@ -51,7 +52,7 @@ public class DatabaseSQL implements DataModel {
                 whiteUsername VARCHAR(255) DEFAULT NULL,
                 blackUsername VARCHAR(255) DEFAULT NULL,
                 gameName VARCHAR(255) NOT NULL,
-                game longtext NOT NULL,
+                game TEXT NOT NULL,
                 PRIMARY KEY (id)
             )""";
 
@@ -169,11 +170,16 @@ public class DatabaseSQL implements DataModel {
 
     public void addGame(GameData game) throws DataAccessException {
         try(var conn = getConnection()) {
-            try(var prep = conn.prepareStatement("INSERT INTO gameDB (gameID, gameName, game) VALUES(?,?,?)")) {
+            try(var prep = conn.prepareStatement("INSERT INTO gameDB (gameID, whiteUsername, blackUsername, gameName, game) VALUES(?,?,?,?,?)")) {
                 prep.setInt(1, game.gameID());
-                prep.setString(2, game.gameName());
-                var json = new Gson().toJson(game.game());
-                prep.setString(3, json);
+                prep.setString(2, game.whiteUsername());
+                prep.setString(3, game.blackUsername());
+                prep.setString(4, game.gameName());
+                Gson gson = new GsonBuilder()
+                        .enableComplexMapKeySerialization()
+                        .create();
+                var json = gson.toJson(game.game());
+                prep.setString(5, json);
                 prep.executeUpdate();
             }
         } catch(SQLException e) {
