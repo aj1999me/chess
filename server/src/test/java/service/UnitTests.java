@@ -9,6 +9,15 @@ import org.junit.jupiter.api.*;
 
 public class UnitTests {
 
+    @BeforeEach
+    public void wipe() {
+        try {
+            new UserService().clear();
+        } catch(Exception e) {
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
     @Test
     public void goodRegistration() {
         try {
