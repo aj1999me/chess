@@ -43,8 +43,8 @@ public class UserService {
         if (user == null) {
             throw new UnauthorizedAccessException("user does not exist");
         }
-        boolean corrPass = BCrypt.checkpw(req.username(), user.password());
-        if (corrPass) {
+        boolean corrPass = BCrypt.checkpw(req.password(), user.password());
+        if (!corrPass) {
             throw new UnauthorizedAccessException("wrong password");
         }
         String auth = generateToken();
