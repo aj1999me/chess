@@ -12,12 +12,11 @@ import java.sql.*;
 import java.util.Collection;
 
 public class DatabaseSQL implements DataModel {
-    public DatabaseSQL() throws DataAccessException {
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "MungaBunga123")) {
-            var prep = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS chess");
-            prep.executeUpdate();
 
-            conn.setCatalog("chess");
+    public DatabaseSQL() throws DataAccessException {
+        createDatabase();
+        try (var conn = getConnection()) {
+
 
             var createUserDB = """
             CREATE TABLE  IF NOT EXISTS userDB (
