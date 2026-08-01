@@ -3,6 +3,7 @@ package service;
 import java.util.UUID;
 import dataaccess.*;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private DatabaseSQL db;
@@ -42,7 +43,8 @@ public class UserService {
         if (user == null) {
             throw new UnauthorizedAccessException("user does not exist");
         }
-        if (!user.password().equals(req.password())) {
+        boolean corrPass = BCrypt.checkpw(req.username(), user.password());
+        if (corrPass) {
             throw new UnauthorizedAccessException("wrong password");
         }
         String auth = generateToken();

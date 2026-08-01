@@ -6,6 +6,7 @@ import static dataaccess.DatabaseManager.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.Collection;
@@ -88,7 +89,8 @@ public class DatabaseSQL implements DataModel {
         try(var conn = getConnection()) {
             try(var preppedStatement = conn.prepareStatement("INSERT INTO userDB (username, password, email) VALUES(?,?,?)")) {
                 preppedStatement.setString(1, user.username());
-                preppedStatement.setString(2, user.password()); // add hashing functionality
+                String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+                preppedStatement.setString(2, hashedPassword); // add hashing functionality
                 preppedStatement.setString(3, user.email());
                 preppedStatement.executeUpdate();
             }
