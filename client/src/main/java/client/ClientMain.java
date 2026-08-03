@@ -7,10 +7,17 @@ import java.util.Scanner;
 import java.util.Locale;
 import com.google.gson.Gson;
 
+import static java.lang.Integer.parseInt;
+
 public class ClientMain {
-    private static final String host = "localhost";
-    private static final int port = 0;
+    private final String host;
+    private final int port;
     private static final HttpClient httpClient = HttpClient.newHttpClient();
+
+    public ClientMain(String host, int port) {
+        this.host = host;
+        this.port = port;
+    }
 
     private static void listOptionsPreLogin() {
         String message = """
@@ -50,7 +57,7 @@ public class ClientMain {
                 } else {
                     var req = new RegisterRequest(args[1], args[2], args[3]);
                     try{
-                        register(host, port, req);
+                        register(req);
                     } catch (Exception e) {
                         System.out.printf("Something went wrong; try again.%n%n");
                     }
@@ -61,12 +68,12 @@ public class ClientMain {
         }
     }
 
-    public static void main(/*String[] args*/) {
+    public static void main(String[] args) {
         System.out.printf("Welcome to the best chess game implementation you've ever played!%n%nType 'help' if you need the available commands.%n");
-        new ClientMain().preLoginLoop();
+        new ClientMain(args[1], parseInt(args[2])).preLoginLoop();
     }
 
-    private void login(String host, int port, LoginRequest req) throws Exception {
+    public void login(String host, int port, LoginRequest req) throws Exception {
         var json = new Gson().toJson(req);
         String urlString = String.format(Locale.getDefault(), "http://%s:%d/session", host, port);
 
@@ -81,19 +88,19 @@ public class ClientMain {
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Welcome %s!%n%n", result.username());
-            new LoggedInClient(result.token()).postLoginLoop();
+            new LoggedInClient(result.authToken()).postLoginLoop();
         } else {
             System.out.printf("Failed to log in.%n%n");
         }
     }
 
-    private void register(String host, int port, RegisterRequest req) throws Exception {
+    public void register(RegisterRequest req) throws Exception {
         var json = new Gson().toJson(req);
         String urlString = String.format(Locale.getDefault(), "http://%s:%d/user", host, port);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(urlString))
-                .timeout(java.time.Duration.ofMillis(5000))
+                //.timeout(java.time.Duration.ofMillis(5000))
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
@@ -102,7 +109,7 @@ public class ClientMain {
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Welcome %s!%n%n", result.username());
-            new LoggedInClient(result.token()).postLoginLoop();
+            new LoggedInClient(result.authToken()).postLoginLoop();
         } else {
             System.out.printf("Failed to register.%n%n");
         }

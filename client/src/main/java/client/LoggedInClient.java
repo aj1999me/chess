@@ -7,9 +7,9 @@ import java.util.Scanner;
 import static java.lang.Integer.parseInt;
 
 public class LoggedInClient {
-    private final int token;
+    private final String token;
 
-    public LoggedInClient(int token) {
+    public LoggedInClient(String token) {
         this.token = token;
     }
 
