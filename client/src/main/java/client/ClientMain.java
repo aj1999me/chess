@@ -5,10 +5,11 @@ import java.net.URI;
 import java.net.http.*;
 import java.util.Scanner;
 import java.util.Locale;
-import static java.lang.Integer.parseInt;
 import com.google.gson.Gson;
 
 public class ClientMain {
+    private static final String host = "localhost";
+    private static final int port = 0;
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     private static void listOptionsPreLogin() {
@@ -37,9 +38,8 @@ public class ClientMain {
                     System.out.printf("You need to provide a username and a password to login.%n%n");
                 } else {
                     var req = new LoginRequest(args[1], args[2]);
-
                     try{
-                        login(host, port);
+                        login(host, port, req);
                     } catch (Exception e) {
                         System.out.printf("Something went wrong; try again.%n%n");
                     }
@@ -48,13 +48,12 @@ public class ClientMain {
                 if (args.length < 4) {
                     System.out.printf("You need to provide a username, password and email to register.%n%n");
                 } else {
-                    String username = args[1];
-                    String password = args[2];
-                    String email = args[3];
-                    //register
-                    /*if (register successful) {
-                        postLoginLoop();
-                    }*/
+                    var req = new RegisterRequest(args[1], args[2], args[3]);
+                    try{
+                        register(host, port, req);
+                    } catch (Exception e) {
+                        System.out.printf("Something went wrong; try again.%n%n");
+                    }
                 }
             } else {
                 System.out.printf("Sorry, that input was invalid.%n%n");
@@ -62,10 +61,9 @@ public class ClientMain {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.printf("Welcome to the best chess game implementation you've ever played!%n");
-        listOptionsPreLogin();
-        preLoginLoop();
+    public static void main(/*String[] args*/) {
+        System.out.printf("Welcome to the best chess game implementation you've ever played!%n%nType 'help' if you need the available commands.%n");
+        new ClientMain().preLoginLoop();
     }
 
     private void login(String host, int port, LoginRequest req) throws Exception {
@@ -84,6 +82,29 @@ public class ClientMain {
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Welcome %s!%n%n", result.username());
             new LoggedInClient(result.token()).postLoginLoop();
+        } else {
+            System.out.printf("Failed to log in.%n%n");
+        }
+    }
+
+    private void register(String host, int port, RegisterRequest req) throws Exception {
+        var json = new Gson().toJson(req);
+        String urlString = String.format(Locale.getDefault(), "http://%s:%d/user", host, port);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(urlString))
+                .timeout(java.time.Duration.ofMillis(5000))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        var result = new Gson().fromJson(httpResponse.body(), LoginResult.class);
+
+        if (httpResponse.statusCode() == 200) {
+            System.out.printf("Welcome %s!%n%n", result.username());
+            new LoggedInClient(result.token()).postLoginLoop();
+        } else {
+            System.out.printf("Failed to register.%n%n");
         }
     }
 }

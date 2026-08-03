@@ -43,23 +43,9 @@ public class LoggedInClient {
                     int gameNumber = parseInt(args[1]);
                     String color = args[2];
 
-                    try {
-                        String urlString = String.format(Locale.getDefault(), "http://%s:%d/session", host, port);
-
-                        HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI(urlString))
-                                .timeout(java.time.Duration.ofMillis(5000))
-                                .POST(HttpRequest.BodyPublishers.ofString(json))
-                                .build();
-                        if (get(host, 8080)) {
-
-                        }
-                    } catch (Exception e) {
-                        System.out.printf("Something went wrong; try again.%n%n");
-                    }
-                    //login
-                    /*if (login successful) {
-                        postLoginLoop();
+                    //join game
+                    /*if (successful) {
+                        gameplayLoop();
                     }*/
                 }
             } else if (args[0].equals("c") || args[0].equals("create")) {
@@ -69,7 +55,14 @@ public class LoggedInClient {
                     String gameName = args[1];
                     //create game
                 }
-            } else {
+            } else if (args[0].equals("o") || args[0].equals("observe")) {
+                if (args.length < 2) {
+                    System.out.printf("You need to provide a game nnumber.%n%n");
+                } else {
+                    int gameNumber = parseInt(args[1]);
+                    //join game as spectator
+                }
+            }else {
                 System.out.printf("Sorry, that input was invalid.%n%n");
             }
         }
