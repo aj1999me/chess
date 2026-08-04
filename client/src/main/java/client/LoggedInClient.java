@@ -1,16 +1,24 @@
 package client;
 
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Locale;
 import java.util.Scanner;
 import static java.lang.Integer.parseInt;
 
 public class LoggedInClient {
     private final String token;
+    private final String host;
+    private final int port;
+    private final HttpClient client;
 
-    public LoggedInClient(String token) {
+    public LoggedInClient(String token, String host, int port, HttpClient client) {
         this.token = token;
+        this.host = host;
+        this.port = port;
+        this.client = client;
     }
 
     private static void listOptionsPostLogin() {
@@ -34,8 +42,12 @@ public class LoggedInClient {
             if (args[0].equals("h") || args[0].equals("help")) {
                 listOptionsPostLogin();
             } else if (args[0].equals("lo") || args[0].equals("logout")) {
-                //logout
-                break;
+                try {
+                    logout();
+                    break;
+                } catch (Exception e) {
+                    System.out.printf(e.getMessage());
+                }
             } else if (args[0].equals("p") || args[0].equals("play")) {
                 if (args.length < 3) {
                     System.out.printf("You need to provide a game number and a color to play.%n%n");
@@ -57,7 +69,7 @@ public class LoggedInClient {
                 }
             } else if (args[0].equals("o") || args[0].equals("observe")) {
                 if (args.length < 2) {
-                    System.out.printf("You need to provide a game nnumber.%n%n");
+                    System.out.printf("You need to provide a game number.%n%n");
                 } else {
                     int gameNumber = parseInt(args[1]);
                     //join game as spectator
@@ -65,6 +77,25 @@ public class LoggedInClient {
             }else {
                 System.out.printf("Sorry, that input was invalid.%n%n");
             }
+        }
+    }
+
+    public void logout() throws Exception {
+        String urlString = String.format(Locale.getDefault(), "http://%s:%d/session", host, port);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(urlString))
+                .header("authorization", token)
+                //.timeout(java.time.Duration.ofMillis(5000))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (httpResponse.statusCode() == 200) {
+            System.out.printf("Successfully logged out.%n%n");
+        } else {
+            throw new Exception("Failed to logout.%n%n");
         }
     }
 }

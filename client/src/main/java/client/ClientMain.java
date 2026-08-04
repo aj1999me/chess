@@ -46,7 +46,7 @@ public class ClientMain {
                 } else {
                     var req = new LoginRequest(args[1], args[2]);
                     try{
-                        login(host, port, req);
+                        enterLoginLoop(login(req));
                     } catch (Exception e) {
                         System.out.printf("Something went wrong; try again.%n%n");
                     }
@@ -57,9 +57,9 @@ public class ClientMain {
                 } else {
                     var req = new RegisterRequest(args[1], args[2], args[3]);
                     try{
-                        register(req);
+                        enterLoginLoop(register(req));
                     } catch (Exception e) {
-                        System.out.printf("Something went wrong; try again.%n%n");
+                        System.out.printf(e.getMessage());
                     }
                 }
             } else {
@@ -73,13 +73,13 @@ public class ClientMain {
         new ClientMain(args[1], parseInt(args[2])).preLoginLoop();
     }
 
-    public void login(String host, int port, LoginRequest req) throws Exception {
+    public String login(LoginRequest req) throws Exception {
         var json = new Gson().toJson(req);
         String urlString = String.format(Locale.getDefault(), "http://%s:%d/session", host, port);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI(urlString))
-                .timeout(java.time.Duration.ofMillis(5000))
+                //.timeout(java.time.Duration.ofMillis(5000))
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
@@ -88,13 +88,13 @@ public class ClientMain {
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Welcome %s!%n%n", result.username());
-            new LoggedInClient(result.authToken()).postLoginLoop();
+            return result.authToken();
         } else {
-            System.out.printf("Failed to log in.%n%n");
+            throw new Exception("Failed to log in.%n%n");
         }
     }
 
-    public void register(RegisterRequest req) throws Exception {
+    public String register(RegisterRequest req) throws Exception {
         var json = new Gson().toJson(req);
         String urlString = String.format(Locale.getDefault(), "http://%s:%d/user", host, port);
 
@@ -109,9 +109,35 @@ public class ClientMain {
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Welcome %s!%n%n", result.username());
-            new LoggedInClient(result.authToken()).postLoginLoop();
+            return result.authToken();
         } else {
-            System.out.printf("Failed to register.%n%n");
+            throw new Exception("Failed to register.%n%n");
         }
+    }
+
+    public static void clear(String host, int port) {
+        try {
+            String urlString = String.format(Locale.getDefault(), "http://%s:%d/db", host, port);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(urlString))
+                    //.timeout(java.time.Duration.ofMillis(5000))
+                    .DELETE()
+                    .build();
+
+            HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (httpResponse.statusCode() == 200) {
+                System.out.printf("Successfully wiped database.%n%n");
+            } else {
+                System.out.printf("Failed to wipe database.%n%n");
+            }
+        } catch(Exception e) {
+            System.out.println("Failed to wipe database." + e.getMessage());
+        }
+    }
+
+    public void enterLoginLoop(String token) {
+        new LoggedInClient(token, host, port, httpClient).postLoginLoop();
     }
 }
