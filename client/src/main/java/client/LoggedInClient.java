@@ -23,6 +23,7 @@ public class LoggedInClient {
         this.host = host;
         this.port = port;
         this.client = client;
+        gameIDs = new HashMap<>();
     }
 
     private static void listOptionsPostLogin() {
@@ -68,8 +69,11 @@ public class LoggedInClient {
                 if (args.length < 2) {
                     System.out.printf("You need to provide a game name.%n%n");
                 } else {
-                    String gameName = args[1];
-                    //create game
+                    try {
+                        makeGame(args[1]);
+                    } catch (Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
                 }
             } else if (args[0].equals("o") || args[0].equals("observe")) {
                 if (args.length < 2) {
@@ -134,7 +138,30 @@ public class LoggedInClient {
         for (int i = 0; i < games.size(); i++) {
             var curr = games.get(i);
             gameIDs.put(i+1, curr.gameID());
-            System.out.printf("%d. %s white: %s black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
+            System.out.printf("%d. Game: %s   White: %s   Black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
+        }
+        System.out.printf("%n");
+    }
+
+    public void makeGame(String gameName) throws Exception {
+        String urlString = String.format(Locale.getDefault(), "http://%s:%d/game", host, port);
+        var json = new Gson().toJson(new GameName(gameName));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(urlString))
+                .header("authorization", token)
+                //.timeout(java.time.Duration.ofMillis(5000))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+        var result = httpResponse.body();
+        var gameID = new Gson().fromJson(result, CreateResult.class);
+
+        if (httpResponse.statusCode() == 200) {
+            System.out.printf("Successfully added game.%n%n");
+        } else {
+            throw new Exception("Failed to logout.%n%n");
         }
     }
 }

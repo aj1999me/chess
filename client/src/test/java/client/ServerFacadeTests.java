@@ -59,4 +59,21 @@ public class ServerFacadeTests {
         }
     }
 
+    @Test
+    public void fourthTest() {
+        var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
+        try{
+            var client = new ClientMain("localhost", 8080);
+
+            var innerLoop  = new LoggedInClient(client.register(req), "localhost", 8080, client.getHttpClient());
+            innerLoop.makeGame("stinkabunga");
+            innerLoop.makeGame("ungabuhungabunga");
+            innerLoop.printList(innerLoop.list());
+            innerLoop.makeGame("extrabungalicious");
+            innerLoop.printList(innerLoop.list());
+        } catch (Exception e) {
+            throw new AssertionError("failed");
+        }
+    }
+
 }
