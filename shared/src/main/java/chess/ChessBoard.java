@@ -9,7 +9,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    protected ChessMap pieces = new ChessMap();
+    protected ChessMap pieces;
     protected ChessPosition whiteKingSquare;
     protected ChessPosition blackKingSquare;
     private final static int[][] DEFAULT_BOARD = {/*white king*/{1,5,0,0},
@@ -24,19 +24,15 @@ public class ChessBoard {
             {7,3,1,5}, {7,4,1,5}, {7,5,1,5}, {7,6,1,5}, {7,7,1,5},
             {7,8,1,5}};
 
-    public ChessBoard() {
-
-    }
-
     public ChessBoard(ChessBoard copy) {
         pieces = copy.pieces.clone();
         whiteKingSquare = new ChessPosition(copy.whiteKingSquare);
         blackKingSquare = new ChessPosition(copy.blackKingSquare);
     }
 
-    /*public ChessBoard(ChessBoard copy) {
-
-    }*/
+    public ChessBoard() {
+        pieces = new ChessMap();
+    }
 
     /**
      * Adds a chess piece to the chessboard

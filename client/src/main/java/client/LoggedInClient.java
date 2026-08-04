@@ -59,6 +59,7 @@ public class LoggedInClient {
                 } else if (args[2].equals("w") || args[2].equals("white")) {
                     try {
                         joinGame(parseInt(args[1]), TeamColor.WHITE);
+                        DrawBoard.main(new String[] {});
                         //go to gameplay loop
                     } catch(Exception e) {
                         System.out.printf(e.getMessage());
