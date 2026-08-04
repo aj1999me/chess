@@ -70,7 +70,7 @@ public class ClientMain {
 
     public static void main(String[] args) {
         System.out.printf("Welcome to the best chess game implementation you've ever played!%n%nType 'help' if you need the available commands.%n");
-        new ClientMain(args[1], parseInt(args[2])).preLoginLoop();
+        new ClientMain(args[0], parseInt(args[1])).preLoginLoop();
     }
 
     public String login(LoginRequest req) throws Exception {

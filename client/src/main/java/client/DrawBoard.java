@@ -23,10 +23,16 @@ public class DrawBoard {
         drawColumnHeaders();
         drawRows();
         drawColumnHeaders();
+        resetColors();
     }
 
     public static void main(String[] args) {
         new DrawBoard(true);
+    }
+
+    public void resetColors() {
+        out.print(RESET_BG_COLOR);
+        out.print(RESET_TEXT_COLOR);
     }
 
     public void drawColumnHeaders() {
