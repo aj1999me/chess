@@ -140,4 +140,8 @@ public class ClientMain {
     public void enterLoginLoop(String token) {
         new LoggedInClient(token, host, port, httpClient).postLoginLoop();
     }
+
+    public HttpClient getHttpClient() {
+        return httpClient;
+    }
 }

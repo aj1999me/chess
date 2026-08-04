@@ -47,4 +47,16 @@ public class ServerFacadeTests {
         }
     }
 
+    @Test
+    public void thirdTest() {
+        var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
+        try{
+            var client = new ClientMain("localhost", 8080);
+
+            new LoggedInClient(client.register(req), "localhost", 8080, client.getHttpClient()).logout();
+        } catch (Exception e) {
+            throw new AssertionError("failed");
+        }
+    }
+
 }

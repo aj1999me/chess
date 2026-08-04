@@ -1,9 +1,12 @@
 package client;
 
+import com.google.gson.Gson;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Scanner;
 import static java.lang.Integer.parseInt;
@@ -13,6 +16,7 @@ public class LoggedInClient {
     private final String host;
     private final int port;
     private final HttpClient client;
+    private HashMap<Integer, Integer> gameIDs;
 
     public LoggedInClient(String token, String host, int port, HttpClient client) {
         this.token = token;
@@ -74,7 +78,13 @@ public class LoggedInClient {
                     int gameNumber = parseInt(args[1]);
                     //join game as spectator
                 }
-            }else {
+            } else if (args[0].equals("l") || args[0].equals("list")) {
+                try {
+                    printList(list());
+                } catch(Exception e) {
+                    System.out.printf(e.getMessage());
+                }
+            } else {
                 System.out.printf("Sorry, that input was invalid.%n%n");
             }
         }
@@ -96,6 +106,35 @@ public class LoggedInClient {
             System.out.printf("Successfully logged out.%n%n");
         } else {
             throw new Exception("Failed to logout.%n%n");
+        }
+    }
+
+    public GameList list() throws Exception {
+        String urlString = String.format(Locale.getDefault(), "http://%s:%d/game", host, port);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(urlString))
+                .header("authorization", token)
+                //.timeout(java.time.Duration.ofMillis(5000))
+                .GET()
+                .build();
+
+        HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+
+        if (httpResponse.statusCode() == 200) {
+            return new Gson().fromJson(httpResponse.body(), GameList.class);
+        } else {
+            throw new Exception("Failed to list games.%n%n");
+        }
+    }
+
+    public void printList(GameList list) {
+        var games = list.games();
+        for (int i = 0; i < games.size(); i++) {
+            var curr = games.get(i);
+            gameIDs.put(i+1, curr.gameID());
+            System.out.printf("%d. %s white: %s black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
         }
     }
 }
