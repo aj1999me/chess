@@ -1,7 +1,7 @@
 package client;
 
 import com.google.gson.Gson;
-
+import chess.ChessGame.TeamColor;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -32,7 +32,7 @@ public class LoggedInClient {
                 Logout: "lo", "logout"
                 Create game: "c", "create" <GAME_NAME>
                 List existing games: "l", "list"
-                Play game: "p", "play" <GAME_NUMBER> <COLOR>
+                Play game: "p", "play" <GAME_NUMBER> <COLOR> (specify "w"/"white" or "b"/"black")
                 Observe game: "o", "observe" <GAME_NUMBER>
                 Print this message: "h", "help"
                 """;
@@ -56,9 +56,23 @@ public class LoggedInClient {
             } else if (args[0].equals("p") || args[0].equals("play")) {
                 if (args.length < 3) {
                     System.out.printf("You need to provide a game number and a color to play.%n%n");
+                } else if (args[2].equals("w") || args[2].equals("white")) {
+                    try {
+                        joinGame(parseInt(args[1]), TeamColor.WHITE);
+                        //go to gameplay loop
+                    } catch(Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
+                } else if (args[2].equals("b") || args[2].equals("black")) {
+                    try {
+                        joinGame(parseInt(args[1]), TeamColor.BLACK);
+                        //go to gameplay loop
+                    } catch(Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
                 } else {
-                    int gameNumber = parseInt(args[1]);
-                    String color = args[2];
+                    System.out.printf("That's not a valid color.%n%n");
+
 
                     //join game
                     /*if (successful) {
@@ -138,7 +152,7 @@ public class LoggedInClient {
         for (int i = 0; i < games.size(); i++) {
             var curr = games.get(i);
             gameIDs.put(i+1, curr.gameID());
-            System.out.printf("%d. Game: %s   White: %s   Black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
+            System.out.printf("%d. Game: %s | White: %s | Black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
         }
         System.out.printf("%n");
     }
@@ -162,6 +176,27 @@ public class LoggedInClient {
             System.out.printf("Successfully added game.%n%n");
         } else {
             throw new Exception("Failed to logout.%n%n");
+        }
+    }
+
+    public void joinGame(int gameNumber, TeamColor color) throws Exception {
+        String urlString = String.format(Locale.getDefault(), "http://%s:%d/game", host, port);
+        int gameID = gameIDs.get(gameNumber);
+        var json = new Gson().toJson(new JoinRequest(gameID, color));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(urlString))
+                .header("authorization", token)
+                //.timeout(java.time.Duration.ofMillis(5000))
+                .PUT(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (httpResponse.statusCode() == 200) {
+            System.out.printf("Joined game successfully.%n%n");
+        } else {
+            throw new Exception("Failed to join.%n%n");
         }
     }
 }
