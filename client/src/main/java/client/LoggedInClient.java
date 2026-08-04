@@ -59,7 +59,7 @@ public class LoggedInClient {
                 } else if (args[2].equals("w") || args[2].equals("white")) {
                     try {
                         joinGame(parseInt(args[1]), TeamColor.WHITE);
-                        DrawBoard.main(new String[] {});
+                        new DrawBoard(false);
                         //go to gameplay loop
                     } catch(Exception e) {
                         System.out.printf(e.getMessage());
@@ -67,18 +67,13 @@ public class LoggedInClient {
                 } else if (args[2].equals("b") || args[2].equals("black")) {
                     try {
                         joinGame(parseInt(args[1]), TeamColor.BLACK);
+                        new DrawBoard(true);
                         //go to gameplay loop
                     } catch(Exception e) {
                         System.out.printf(e.getMessage());
                     }
                 } else {
                     System.out.printf("That's not a valid color.%n%n");
-
-
-                    //join game
-                    /*if (successful) {
-                        gameplayLoop();
-                    }*/
                 }
             } else if (args[0].equals("c") || args[0].equals("create")) {
                 if (args.length < 2) {
@@ -95,6 +90,7 @@ public class LoggedInClient {
                     System.out.printf("You need to provide a game number.%n%n");
                 } else {
                     int gameNumber = parseInt(args[1]);
+                    new DrawBoard(false);
                     //join game as spectator
                 }
             } else if (args[0].equals("l") || args[0].equals("list")) {
