@@ -48,9 +48,11 @@ public class LoggedInClient {
             } else if (args[0].equals("p") || args[0].equals("play")) {
                 if (args.length < 3) {
                     System.out.printf("You need to provide a game number and a color to play.%n%n");
+                } else if (args.length > 3) {
+                    System.out.printf("You only need a game number and a color.%n%n");
                 } else if (args[2].equals("w") || args[2].equals("white")) {
-                    int gameID = gameIDs.get(parseInt(args[1]));
                     try {
+                        int gameID = checkID(args[1]);
                         new ServerFacade(host, port).joinGame(gameID, TeamColor.WHITE, token);
                         new DrawBoard(false);
                         //go to gameplay loop
@@ -58,8 +60,8 @@ public class LoggedInClient {
                         System.out.printf(e.getMessage());
                     }
                 } else if (args[2].equals("b") || args[2].equals("black")) {
-                    int gameID = gameIDs.get(parseInt(args[1]));
                     try {
+                        int gameID = checkID(args[1]);
                         new ServerFacade(host, port).joinGame(gameID, TeamColor.BLACK, token);
                         new DrawBoard(true);
                         //go to gameplay loop
@@ -72,6 +74,8 @@ public class LoggedInClient {
             } else if (args[0].equals("c") || args[0].equals("create")) {
                 if (args.length < 2) {
                     System.out.printf("You need to provide a game name.%n%n");
+                } else if (args.length > 2) {
+                    System.out.printf("You only need a game name.%n%n");
                 } else {
                     try {
                         new ServerFacade(host, port).makeGame(args[1], token);
@@ -83,8 +87,12 @@ public class LoggedInClient {
                 if (args.length < 2) {
                     System.out.printf("You need to provide a game number.%n%n");
                 } else {
-                    int gameNumber = parseInt(args[1]);
-                    new DrawBoard(false);
+                    try {
+                        checkID(args[1]);
+                        new DrawBoard(false);
+                    } catch(Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
                     //join game as spectator
                 }
             } else if (args[0].equals("l") || args[0].equals("list")) {
@@ -107,5 +115,18 @@ public class LoggedInClient {
             System.out.printf("%d. Game: %s | White: %s | Black: %s%n", i+1, curr.gameName(), curr.whiteUsername(), curr.blackUsername());
         }
         System.out.printf("%n");
+    }
+
+    public int checkID(String id) throws Exception {
+        int gameNumber;
+        try {
+            gameNumber = parseInt(id);
+        } catch(Exception e) {
+            throw new Exception("Game number must be a number.%n%n");
+        }
+        if (gameNumber < 1 || gameNumber > gameIDs.size()) {
+            throw new Exception("Game number not in list.%n%n");
+        }
+        return gameIDs.get(gameNumber);
     }
 }

@@ -39,6 +39,8 @@ public class ClientMain {
             } else if (args[0].equals("l") || args[0].equals("login")) {
                 if (args.length < 3) {
                     System.out.printf("You need to provide a username and a password to login.%n%n");
+                } else if (args.length > 3) {
+                    System.out.printf("You only need a username and a password.%n%n");
                 } else {
                     var req = new LoginRequest(args[1], args[2]);
                     try{
@@ -50,6 +52,9 @@ public class ClientMain {
             } else if (args[0].equals("r") || args[0].equals("register")) {
                 if (args.length < 4) {
                     System.out.printf("You need to provide a username, password and email to register.%n%n");
+                } else if (args.length > 4) {
+                    System.out.printf("You need to provide a username, password and email to register.%n%n");
+
                 } else {
                     var req = new RegisterRequest(args[1], args[2], args[3]);
                     try{
