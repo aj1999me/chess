@@ -8,17 +8,19 @@ import server.Server;
 public class ServerFacadeTests {
 
     private static Server server;
+    private static int port;
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(8080);
+        var port = server.run(0);
+        ServerFacadeTests.port = port;
         System.out.println("Started test HTTP server on " + port);
     }
 
     @BeforeEach
     public void clear() {
-        ServerFacade.clear("localhost", 8080);
+        ServerFacade.clear("localhost", port);
     }
 
     @AfterAll
@@ -31,7 +33,7 @@ public class ServerFacadeTests {
     public void registerGood() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            new ServerFacade("localhost", 8080).register(req);
+            new ServerFacade("localhost", port).register(req);
         } catch(Exception e) {
             throw new AssertionError(e.getMessage());
         }
@@ -41,7 +43,7 @@ public class ServerFacadeTests {
     public void registerBad() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             facade.register(req);
             Assertions.assertThrows(Exception.class, () -> facade.register(req));
         } catch(Exception e) {
@@ -54,7 +56,7 @@ public class ServerFacadeTests {
         var req = new LoginRequest("aj", "mungabunga");
         try{
             registerGood();
-            new ServerFacade("localhost", 8080).login(req);
+            new ServerFacade("localhost", port).login(req);
         } catch(Exception e) {
             throw new AssertionError(e.getMessage());
         }
@@ -65,7 +67,7 @@ public class ServerFacadeTests {
         var req = new LoginRequest("aj", "wrongPassword");
         try{
             registerGood();
-            Assertions.assertThrows(Exception.class, () -> new ServerFacade("localhost", 8080).login(req));
+            Assertions.assertThrows(Exception.class, () -> new ServerFacade("localhost", port).login(req));
         } catch(Exception e) {
             throw new AssertionError(e.getMessage());
         }
@@ -75,7 +77,7 @@ public class ServerFacadeTests {
     public void logoutGood() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             facade.logout(facade.register(req));
         } catch (Exception e) {
             throw new AssertionError("failed");
@@ -86,7 +88,7 @@ public class ServerFacadeTests {
     public void logoutBad() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             var auth = facade.register(req);
             Assertions.assertThrows(Exception.class, () -> facade.logout(auth + "wrongPassword"));
         } catch (Exception e) {
@@ -98,7 +100,7 @@ public class ServerFacadeTests {
     public void makeGood() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             facade.makeGame("stinkabunga", auth);
             facade.makeGame("ungabuhungabunga", auth);
@@ -111,7 +113,7 @@ public class ServerFacadeTests {
     public void makeBad() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             facade.makeGame("stinkabunga", auth);
             Assertions.assertThrows(Exception.class, () -> facade.makeGame("stinkabunga", auth));
@@ -124,7 +126,7 @@ public class ServerFacadeTests {
     public void joinGood() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             int id = facade.makeGame("stinkabunga", auth);
             facade.joinGame(id, ChessGame.TeamColor.WHITE, auth);
@@ -137,7 +139,7 @@ public class ServerFacadeTests {
     public void joinBad() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             int id = facade.makeGame("stinkabunga", auth);
             Assertions.assertThrows(Exception.class, () -> facade.joinGame(1, ChessGame.TeamColor.WHITE, auth));
@@ -150,7 +152,7 @@ public class ServerFacadeTests {
     public void listGood() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             int id = facade.makeGame("stinkabunga", auth);
             var list = facade.list(auth);
@@ -164,7 +166,7 @@ public class ServerFacadeTests {
     public void listBad() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var facade = new ServerFacade("localhost", 8080);
+            var facade = new ServerFacade("localhost", port);
             String auth = facade.register(req);
             int id = facade.makeGame("stinkabunga", auth);
             Assertions.assertThrows(Exception.class, () -> facade.list(auth + "bad auth"));

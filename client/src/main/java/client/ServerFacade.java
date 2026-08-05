@@ -12,7 +12,7 @@ import java.util.Locale;
 public class ServerFacade {
     private final String host;
     private final int port;
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient Client = HttpClient.newHttpClient();
 
     public ServerFacade(String host, int port) {
         this.host = host;
@@ -28,7 +28,7 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
         var result = new Gson().fromJson(httpResponse.body(), LoginResult.class);
 
         if (httpResponse.statusCode() == 200) {
@@ -50,7 +50,7 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
         var result = new Gson().fromJson(httpResponse.body(), LoginResult.class);
 
         if (httpResponse.statusCode() == 200) {
@@ -70,7 +70,7 @@ public class ServerFacade {
                 .DELETE()
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Successfully logged out.%n%n");
@@ -88,7 +88,7 @@ public class ServerFacade {
                     .DELETE()
                     .build();
 
-            HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (httpResponse.statusCode() == 200) {
                 System.out.printf("Successfully wiped database.%n%n");
@@ -110,7 +110,7 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
         var result = httpResponse.body();
         var gameID = new Gson().fromJson(result, CreateResult.class);
 
@@ -131,7 +131,7 @@ public class ServerFacade {
                 .GET()
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
 
 
         if (httpResponse.statusCode() == 200) {
@@ -151,7 +151,7 @@ public class ServerFacade {
                 .PUT(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = Client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (httpResponse.statusCode() == 200) {
             System.out.printf("Joined game successfully.%n%n");

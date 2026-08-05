@@ -10,8 +10,10 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 
 public class DrawBoard {
-    private static String[] columnMarks = {"  \u2003a   ", "  \u2003b   ", "  \u2003c   ", "  \u2003d   ", "  \u2003e   ", "  \u2003f   ", "  \u2003g   ", "  \u2003h   "};
-    private static String[] rowMarks = {"  \u20031   ", "  \u20032   ", "  \u20033   ", "  \u20034   ", "  \u20035   ", "  \u20036   ", "  \u20037   ", "  \u20038   "};
+    private static String[] columnMarks = {"  \u2003a   ", "  \u2003b   ", "  \u2003c   ", "  \u2003d   ",
+            "  \u2003e   ", "  \u2003f   ", "  \u2003g   ", "  \u2003h   "};
+    private static String[] rowMarks = {"  \u20031   ", "  \u20032   ", "  \u20033   ", "  \u20034   ",
+            "  \u20035   ", "  \u20036   ", "  \u20037   ", "  \u20038   "};
     private static ChessBoard board = new ChessGame().getBoard();
     private final boolean flipped;
     PrintStream out;
