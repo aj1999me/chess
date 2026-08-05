@@ -18,7 +18,7 @@ public class ServerFacadeTests {
 
     @BeforeEach
     public void clear() {
-        ClientMain.clear("localhost", 8080);
+        ServerFacade.clear("localhost", 8080);
     }
 
     @AfterAll
@@ -31,7 +31,7 @@ public class ServerFacadeTests {
     public void firstTest() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            new ClientMain("localhost", 8080).register(req);
+            new ServerFacade("localhost", 8080).register(req);
         } catch(Exception e) {
             throw new AssertionError(e.getMessage());
         }
@@ -42,7 +42,7 @@ public class ServerFacadeTests {
         var req = new LoginRequest("aj", "mungabunga");
         try{
             firstTest();
-            new ClientMain("localhost", 8080).login(req);
+            new ServerFacade("localhost", 8080).login(req);
         } catch(Exception e) {
             throw new AssertionError(e.getMessage());
         }
@@ -52,9 +52,8 @@ public class ServerFacadeTests {
     public void thirdTest() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var client = new ClientMain("localhost", 8080);
-
-            new LoggedInClient(client.register(req), "localhost", 8080, client.getHttpClient()).logout();
+            var facade = new ServerFacade("localhost", 8080);
+            facade.logout(facade.register(req));
         } catch (Exception e) {
             throw new AssertionError("failed");
         }
@@ -64,14 +63,10 @@ public class ServerFacadeTests {
     public void fourthTest() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var client = new ClientMain("localhost", 8080);
-
-            var innerLoop  = new LoggedInClient(client.register(req), "localhost", 8080, client.getHttpClient());
-            innerLoop.makeGame("stinkabunga");
-            innerLoop.makeGame("ungabuhungabunga");
-            innerLoop.printList(innerLoop.list());
-            innerLoop.makeGame("extrabungalicious");
-            innerLoop.printList(innerLoop.list());
+            var facade = new ServerFacade("localhost", 8080);
+            String auth = facade.register(req);
+            facade.makeGame("stinkabunga", auth);
+            facade.makeGame("ungabuhungabunga", auth);
         } catch (Exception e) {
             throw new AssertionError("failed");
         }
@@ -81,13 +76,10 @@ public class ServerFacadeTests {
     public void fifthTest() {
         var req = new RegisterRequest("aj", "mungabunga", "googoogaga@email.com");
         try{
-            var client = new ClientMain("localhost", 8080);
-
-            var innerLoop  = new LoggedInClient(client.register(req), "localhost", 8080, client.getHttpClient());
-            innerLoop.makeGame("stinkabunga");
-            innerLoop.printList(innerLoop.list());
-            innerLoop.joinGame(1, ChessGame.TeamColor.WHITE);
-            innerLoop.printList(innerLoop.list());
+            var facade = new ServerFacade("localhost", 8080);
+            String auth = facade.register(req);
+            int id = facade.makeGame("stinkabunga", auth);
+            facade.joinGame(id, ChessGame.TeamColor.WHITE, auth);
         } catch (Exception e) {
             throw new AssertionError("failed");
         }

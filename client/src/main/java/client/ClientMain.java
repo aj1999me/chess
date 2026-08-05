@@ -1,18 +1,14 @@
 package client;
 
 import chess.*;
-import java.net.URI;
 import java.net.http.*;
 import java.util.Scanner;
-import java.util.Locale;
-import com.google.gson.Gson;
 
 import static java.lang.Integer.parseInt;
 
 public class ClientMain {
     private final String host;
     private final int port;
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     public ClientMain(String host, int port) {
         this.host = host;
@@ -46,9 +42,9 @@ public class ClientMain {
                 } else {
                     var req = new LoginRequest(args[1], args[2]);
                     try{
-                        enterLoginLoop(login(req));
+                        enterLoginLoop(new ServerFacade(host, port).login(req));
                     } catch (Exception e) {
-                        System.out.printf("Something went wrong; try again.%n%n");
+                        System.out.printf(e.getMessage());
                     }
                 }
             } else if (args[0].equals("r") || args[0].equals("register")) {
@@ -57,7 +53,7 @@ public class ClientMain {
                 } else {
                     var req = new RegisterRequest(args[1], args[2], args[3]);
                     try{
-                        enterLoginLoop(register(req));
+                        enterLoginLoop(new ServerFacade(host, port).register(req));
                     } catch (Exception e) {
                         System.out.printf(e.getMessage());
                     }
@@ -73,75 +69,7 @@ public class ClientMain {
         new ClientMain(args[0], parseInt(args[1])).preLoginLoop();
     }
 
-    public String login(LoginRequest req) throws Exception {
-        var json = new Gson().toJson(req);
-        String urlString = String.format(Locale.getDefault(), "http://%s:%d/session", host, port);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(urlString))
-                //.timeout(java.time.Duration.ofMillis(5000))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        var result = new Gson().fromJson(httpResponse.body(), LoginResult.class);
-
-        if (httpResponse.statusCode() == 200) {
-            System.out.printf("Welcome %s!%n%n", result.username());
-            return result.authToken();
-        } else {
-            throw new Exception("Failed to log in.%n%n");
-        }
-    }
-
-    public String register(RegisterRequest req) throws Exception {
-        var json = new Gson().toJson(req);
-        String urlString = String.format(Locale.getDefault(), "http://%s:%d/user", host, port);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(urlString))
-                //.timeout(java.time.Duration.ofMillis(5000))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-
-        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        var result = new Gson().fromJson(httpResponse.body(), LoginResult.class);
-
-        if (httpResponse.statusCode() == 200) {
-            System.out.printf("Welcome %s!%n%n", result.username());
-            return result.authToken();
-        } else {
-            throw new Exception("Failed to register.%n%n");
-        }
-    }
-
-    public static void clear(String host, int port) {
-        try {
-            String urlString = String.format(Locale.getDefault(), "http://%s:%d/db", host, port);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlString))
-                    //.timeout(java.time.Duration.ofMillis(5000))
-                    .DELETE()
-                    .build();
-
-            HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (httpResponse.statusCode() == 200) {
-                System.out.printf("Successfully wiped database.%n%n");
-            } else {
-                System.out.printf("Failed to wipe database.%n%n");
-            }
-        } catch(Exception e) {
-            System.out.println("Failed to wipe database." + e.getMessage());
-        }
-    }
-
     public void enterLoginLoop(String token) {
-        new LoggedInClient(token, host, port, httpClient).postLoginLoop();
-    }
-
-    public HttpClient getHttpClient() {
-        return httpClient;
+        new LoggedInClient(token, host, port).postLoginLoop();
     }
 }
