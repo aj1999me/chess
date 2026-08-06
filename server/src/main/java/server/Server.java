@@ -31,6 +31,14 @@ public class Server {
                 .get("/game", this::list)
                 .post("/game", this::create)
                 .put("/game", this::join)
+                .ws("/ws", ws -> {
+                    ws.onConnect(ctx -> {
+                        ctx.enableAutomaticPings();
+                        System.out.println("Websocket connected");
+                    });
+                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
+                    ws.onClose(ctx -> System.out.println("Websocket closed"));
+                })
                 .exception(AlreadyTakenException.class, this::atExceptionHandler)
                 .exception(DataAccessException.class, this::daExceptionHandler)
                 .exception(UnauthorizedAccessException.class, this::uaExceptionHandler)

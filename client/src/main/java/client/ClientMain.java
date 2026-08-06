@@ -15,7 +15,7 @@ public class ClientMain {
         this.port = port;
     }
 
-    private static void listOptionsPreLogin() {
+    private static void listOptions() {
         String message = """
                 Options:
                 Login as an existing user: "l", "login" <USERNAME> <PASSWORD>
@@ -26,13 +26,13 @@ public class ClientMain {
         System.out.println(message);
     }
 
-    private void preLoginLoop() {
+    private void loop() {
         while (true) {
             System.out.printf("What do you want to do?%n>>> ");
             var scanner = new Scanner(System.in);
             var args = scanner.nextLine().split(" ");
             if (args[0].equals("h") || args[0].equals("help")) {
-                listOptionsPreLogin();
+                listOptions();
             } else if (args[0].equals("q") || args[0].equals("quit")) {
                 System.out.printf("Bye!%n");
                 break;
@@ -54,7 +54,6 @@ public class ClientMain {
                     System.out.printf("You need to provide a username, password and email to register.%n%n");
                 } else if (args.length > 4) {
                     System.out.printf("You need to provide a username, password and email to register.%n%n");
-
                 } else {
                     var req = new RegisterRequest(args[1], args[2], args[3]);
                     try{
@@ -71,10 +70,10 @@ public class ClientMain {
 
     public static void main(String[] args) {
         System.out.printf("Welcome to the best chess game implementation you've ever played!%n%nType 'help' if you need the available commands.%n");
-        new ClientMain(args[0], parseInt(args[1])).preLoginLoop();
+        new ClientMain(args[0], parseInt(args[1])).loop();
     }
 
     public void enterLoginLoop(String token) {
-        new LoggedInClient(token, host, port).postLoginLoop();
+        new LoggedInClient(token, host, port).loop();
     }
 }

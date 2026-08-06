@@ -18,7 +18,7 @@ public class LoggedInClient {
         gameIDs = new HashMap<>();
     }
 
-    private static void listOptionsPostLogin() {
+    private static void listOptions() {
         String message = """
                 Options:
                 Logout: "lo", "logout"
@@ -31,13 +31,13 @@ public class LoggedInClient {
         System.out.println(message);
     }
 
-    public void postLoginLoop() {
+    public void loop() {
         while (true) {
             System.out.printf("What do you want to do?%n>>> ");
             var scanner = new Scanner(System.in);
             var args = scanner.nextLine().split(" ");
             if (args[0].equals("h") || args[0].equals("help")) {
-                listOptionsPostLogin();
+                listOptions();
             } else if (args[0].equals("lo") || args[0].equals("logout")) {
                 try {
                     new ServerFacade(host, port).logout(token);
