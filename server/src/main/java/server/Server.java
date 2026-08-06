@@ -2,6 +2,7 @@ package server;
 
 import io.javalin.*;
 import dataaccess.*;
+import io.javalin.websocket.WsMessageContext;
 import service.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
@@ -9,6 +10,7 @@ import websocket.commands.*;
 import websocket.messages.*;
 
 import java.util.Map;
+import java.util.HashSet;
 
 
 public class Server {
@@ -17,6 +19,9 @@ public class Server {
     private DatabaseSQL db;
     private final UserService us;
     private final GameService gs;
+    private WsMessageContext root;
+
+    private HashSet<WsMessageContext> clients = new HashSet<>();;
 
     public Server() {
         try {
@@ -39,7 +44,7 @@ public class Server {
                         ctx.enableAutomaticPings();
                         System.out.println("Websocket connected");
                     });
-                    ws.onMessage(ctx -> handleCommand(ctx.message()));
+                    ws.onMessage(this::handleCommand);
                     ws.onClose(ctx -> System.out.println("Websocket closed"));
                 })
                 .exception(AlreadyTakenException.class, this::atExceptionHandler)
@@ -143,7 +148,19 @@ public class Server {
         return db;
     }
 
-    public ServerMessage handleCommand(String json) {
+    public void handleCommand(WsMessageContext ctx) {
+        clients.add(ctx);
+        root = ctx;
+        var json = ctx.message();
+        var type = new Gson().fromJson(json, UserGameCommand.class).getCommandType();
+        if (type == UserGameCommand.CommandType.CONNECT) {
 
+        } else if (type == UserGameCommand.CommandType.LEAVE) {
+
+        } else if (type == UserGameCommand.CommandType.RESIGN) {
+
+        } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
+
+        }
     }
 }

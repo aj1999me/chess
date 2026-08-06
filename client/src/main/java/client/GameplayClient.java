@@ -8,6 +8,7 @@ import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 import jakarta.websocket.WebSocketContainer;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -20,12 +21,14 @@ public class GameplayClient extends Endpoint {
     private int port;
     private String token;
     private int id;
+    private final boolean white;
 
-    public GameplayClient(String host, int port, String token, int id) throws Exception {
+    public GameplayClient(String host, int port, String token, int id, boolean white) throws Exception {
         this.host = host;
         this.port = port;
         this.token = token;
         this.id = id;
+        this.white = white;
         String urlString = String.format(Locale.getDefault(), "ws://%s:%d/ws", host, port);
 
         URI uri = new URI(urlString);
@@ -34,8 +37,15 @@ public class GameplayClient extends Endpoint {
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println(message);
-                System.out.println("\nEnter another message you want to echo:");
+                var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
+                if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
+                    var game = new Gson().fromJson(message, LoadGameMessage.class).game();
+                    new DrawBoard(white, game.getBoard());
+                } else if (type == ServerMessage.ServerMessageType.ERROR) {
+
+                } else if (type == ServerMessage.ServerMessageType.NOTIFICATION) {
+
+                }
             }
         });
     }
@@ -44,8 +54,20 @@ public class GameplayClient extends Endpoint {
     }
 
     public void connect() throws Exception {
-        var txt = new UserGameCommand(UserGameCommand.CommandType.CONNECT, token, id);
-        var json = new Gson().toJson(txt);
+        var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, token, id);
+        var json = new Gson().toJson(command);
+        session.getBasicRemote().sendText(json);
+    }
+
+    public void leave() throws Exception {
+        var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, token, id);
+        var json = new Gson().toJson(command);
+        session.getBasicRemote().sendText(json);
+    }
+
+    public void resign() throws Exception {
+        var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, token, id);
+        var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }
 }

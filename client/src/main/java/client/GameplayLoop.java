@@ -1,6 +1,6 @@
 package client;
 
-import chess.ChessBoard;
+import chess.ChessGame;
 
 import java.util.Scanner;
 
@@ -9,7 +9,6 @@ public class GameplayLoop {
     private final int port;
     private final String token;
     private final GameplayClient client;
-    private ChessBoard board;
     private final int ID;
     private final boolean WHITE;
 
@@ -19,7 +18,7 @@ public class GameplayLoop {
         this.token = token;
         this.ID = ID;
         this.WHITE = WHITE;
-        client = new GameplayClient(host, port, token, ID);
+        client = new GameplayClient(host, port, token, ID, WHITE);
         try {
             client.connect();
         } catch(Exception e) {
@@ -48,8 +47,12 @@ public class GameplayLoop {
             if (args[0].equals("h") || args[0].equals("help")) {
                 listOptions();
             } else if (args[0].equals("l") || args[0].equals("leave")) {
-                //leave
-                break;
+                try {
+                    client.leave();
+                    break;
+                } catch(Exception e) {
+                    System.out.printf(e.getMessage());
+                }
             } else if (args[0].equals("hl") || args[0].equals("highlight")) {
                 if (args.length < 2) {
                     System.out.printf("You need to provide a piece to highlight.%n%n");
