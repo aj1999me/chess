@@ -5,6 +5,9 @@ import dataaccess.*;
 import service.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
+import websocket.commands.*;
+import websocket.messages.*;
+
 import java.util.Map;
 
 
@@ -36,7 +39,7 @@ public class Server {
                         ctx.enableAutomaticPings();
                         System.out.println("Websocket connected");
                     });
-                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
+                    ws.onMessage(ctx -> handleCommand(ctx.message()));
                     ws.onClose(ctx -> System.out.println("Websocket closed"));
                 })
                 .exception(AlreadyTakenException.class, this::atExceptionHandler)
@@ -138,5 +141,9 @@ public class Server {
 
     public DatabaseSQL getDb() {
         return db;
+    }
+
+    public ServerMessage handleCommand(String json) {
+
     }
 }

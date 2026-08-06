@@ -14,12 +14,13 @@ public class DrawBoard {
             "  \u2003e   ", "  \u2003f   ", "  \u2003g   ", "  \u2003h   "};
     private static String[] rowMarks = {"  \u20031   ", "  \u20032   ", "  \u20033   ", "  \u20034   ",
             "  \u20035   ", "  \u20036   ", "  \u20037   ", "  \u20038   "};
-    private static ChessBoard board = new ChessGame().getBoard();
+    private ChessBoard board;
     private final boolean flipped;
     PrintStream out;
 
-    public DrawBoard(boolean flipped) {
-        this.flipped = flipped;
+    public DrawBoard(boolean WHITE, ChessBoard board) {
+        this.flipped = !WHITE;
+        this.board = board;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         drawColumnHeaders();
@@ -29,7 +30,7 @@ public class DrawBoard {
     }
 
     public static void main(String[] args) {
-        new DrawBoard(true);
+        new DrawBoard(true, new ChessGame().getBoard());
     }
 
     public void resetColors() {

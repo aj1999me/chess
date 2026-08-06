@@ -1,18 +1,30 @@
 package client;
 
+import chess.ChessBoard;
+
 import java.util.Scanner;
 
 public class GameplayLoop {
     private final String host;
     private final int port;
     private final String token;
-    private GameplayClient client;
+    private final GameplayClient client;
+    private ChessBoard board;
+    private final int ID;
+    private final boolean WHITE;
 
-    public GameplayLoop(String host, int port, String token) throws Exception {
+    public GameplayLoop(String host, int port, String token, int ID, boolean WHITE) throws Exception {
         this.host = host;
         this.port = port;
         this.token = token;
-        client = new GameplayClient(host, port);
+        this.ID = ID;
+        this.WHITE = WHITE;
+        client = new GameplayClient(host, port, token, ID);
+        try {
+            client.connect();
+        } catch(Exception e) {
+            throw new Exception("Failed to connect to server.%n%n");
+        }
     }
 
     private static void listOptions() {
@@ -28,7 +40,7 @@ public class GameplayLoop {
         System.out.println(message);
     }
 
-    private void loop() {
+    public void loop() {
         while (true) {
             System.out.printf("What do you want to do?%n>>> ");
             var scanner = new Scanner(System.in);
