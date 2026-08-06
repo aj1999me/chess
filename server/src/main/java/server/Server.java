@@ -1,5 +1,7 @@
 package server;
 
+import chess.ChessGame;
+import com.google.gson.GsonBuilder;
 import io.javalin.*;
 import dataaccess.*;
 import io.javalin.websocket.WsMessageContext;
@@ -152,9 +154,17 @@ public class Server {
         clients.add(ctx);
         root = ctx;
         var json = ctx.message();
-        var type = new Gson().fromJson(json, UserGameCommand.class).getCommandType();
+        var command = new Gson().fromJson(json, UserGameCommand.class);
+        var type = command.getCommandType();
         if (type == UserGameCommand.CommandType.CONNECT) {
-
+            try {
+                if (db.checkAuth(command.getAuthToken())) {
+                    var game = db.getGame(command.getGameID()).game();
+                    loadGame(game);
+                }
+            } catch(DataAccessException e) {
+                sendError();
+            }
         } else if (type == UserGameCommand.CommandType.LEAVE) {
 
         } else if (type == UserGameCommand.CommandType.RESIGN) {
@@ -162,5 +172,17 @@ public class Server {
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
 
         }
+    }
+
+    public void sendError() {
+
+    }
+
+    public void loadGame(ChessGame game) {
+        Gson gson = new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .create();
+        var message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+        root.send(gson.toJson(message));
     }
 }

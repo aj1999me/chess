@@ -35,17 +35,15 @@ public class GameplayClient extends Endpoint {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
 
-        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-            public void onMessage(String message) {
-                var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
-                if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
-                    var game = new Gson().fromJson(message, LoadGameMessage.class).game();
-                    new DrawBoard(white, game.getBoard());
-                } else if (type == ServerMessage.ServerMessageType.ERROR) {
+        this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+            var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
+            if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
+                var game = new Gson().fromJson(message, LoadGameMessage.class).game();
+                new DrawBoard(white, game.getBoard());
+            } else if (type == ServerMessage.ServerMessageType.ERROR) {
 
-                } else if (type == ServerMessage.ServerMessageType.NOTIFICATION) {
+            } else if (type == ServerMessage.ServerMessageType.NOTIFICATION) {
 
-                }
             }
         });
     }

@@ -65,8 +65,6 @@ public class LoggedInClient {
                         int gameID = checkID(args[1]);
                         new ServerFacade(host, port).joinGame(gameID, TeamColor.BLACK, token);
                         new GameplayLoop(host, port, token, gameID, false).loop();
-                        //new DrawBoard(true);
-                        //go to gameplay loop
                     } catch(Exception e) {
                         System.out.printf(e.getMessage());
                     }
@@ -92,11 +90,9 @@ public class LoggedInClient {
                     try {
                         int gameID = checkID(args[1]);
                         new GameplayLoop(host, port, token, gameID, true).loop();
-                        //new DrawBoard(false);
                     } catch(Exception e) {
                         System.out.printf(e.getMessage());
                     }
-                    //join game as spectator
                 }
             } else if (args[0].equals("l") || args[0].equals("list")) {
                 try {
