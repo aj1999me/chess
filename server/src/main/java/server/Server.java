@@ -161,6 +161,8 @@ public class Server {
                 if (db.checkAuth(command.getAuthToken())) {
                     var game = db.getGame(command.getGameID()).game();
                     loadGame(game);
+                    String message = "someone joined the game lol";
+                    notifyAll(message);
                 }
             } catch(DataAccessException e) {
                 sendError();
@@ -184,5 +186,13 @@ public class Server {
                 .create();
         var message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         root.send(gson.toJson(message));
+    }
+
+    public void notifyAll(String message) {
+        var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        for (var client : clients) {
+            var json = new Gson().toJson(notification);
+            client.send(json);
+        }
     }
 }

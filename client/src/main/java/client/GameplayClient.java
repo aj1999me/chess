@@ -10,6 +10,7 @@ import jakarta.websocket.WebSocketContainer;
 import websocket.commands.UserGameCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
+import websocket.messages.ServerNotification;
 
 import java.io.IOException;
 import java.net.URI;
@@ -43,7 +44,8 @@ public class GameplayClient extends Endpoint {
             } else if (type == ServerMessage.ServerMessageType.ERROR) {
 
             } else if (type == ServerMessage.ServerMessageType.NOTIFICATION) {
-
+                var notification = new Gson().fromJson(message, ServerNotification.class).getMessage();
+                System.out.printf(notification);
             }
         });
     }
