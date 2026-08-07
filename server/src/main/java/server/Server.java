@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.GsonBuilder;
 import io.javalin.*;
 import dataaccess.*;
+import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
 import service.*;
 import io.javalin.http.Context;
@@ -21,9 +22,9 @@ public class Server {
     private DatabaseSQL db;
     private final UserService us;
     private final GameService gs;
-    private WsMessageContext root;
+    private WsContext root;
 
-    private HashSet<WsMessageContext> clients = new HashSet<>();;
+    private HashSet<WsContext> clients = new HashSet<>();;
 
     public Server() {
         try {
@@ -45,6 +46,7 @@ public class Server {
                     ws.onConnect(ctx -> {
                         ctx.enableAutomaticPings();
                         System.out.println("Websocket connected");
+                        clients.add(ctx);
                     });
                     ws.onMessage(this::handleCommand);
                     ws.onClose(ctx -> System.out.println("Websocket closed"));
@@ -151,7 +153,6 @@ public class Server {
     }
 
     public void handleCommand(WsMessageContext ctx) {
-        clients.add(ctx);
         root = ctx;
         var json = ctx.message();
         var command = new Gson().fromJson(json, UserGameCommand.class);
@@ -191,8 +192,10 @@ public class Server {
     public void notifyAll(String message) {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
         for (var client : clients) {
-            var json = new Gson().toJson(notification);
-            client.send(json);
+            if (!client.equals(root)) {
+                var json = new Gson().toJson(notification);
+                client.send(json);
+            }
         }
     }
 }

@@ -35,7 +35,7 @@ public class ServerFacade {
             System.out.printf("Welcome %s!%n%n", result.username());
             return result.authToken();
         } else if (httpResponse.statusCode() == 401) {
-            throw new Exception("Wrong username or password.");
+            throw new Exception("Wrong username or password.%n%n");
         } else {
             throw new Exception("Failed to log in.%n%n");
         }
