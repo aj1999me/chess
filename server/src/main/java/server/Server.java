@@ -156,15 +156,22 @@ public class Server {
 
     public void handleCommand(WsMessageContext ctx) {
         var json = ctx.message();
-        var command = new Gson().fromJson(json, UserGameCommand.class);
-        var type = command.getCommandType();
+        var type = new Gson().fromJson(json, UserGameCommand.class).getCommandType();
         if (type == UserGameCommand.CommandType.CONNECT) {
+            var command = new Gson().fromJson(json, ConnectCommand.class);
             try {
                 if (db.checkAuth(command.getAuthToken())) {
                     String username = db.getAuth(command.getAuthToken()).username();
                     var game = db.getGame(command.getGameID()).game();
                     loadGame(ctx, game);
-                    String message = username + " joined the game as";
+                    String message = username + " joined the game as ";
+                    if (command.white() == null) {
+                        message += "observer";
+                    } else if (command.white()) {
+                        message += "white";
+                    } else {
+                        message += "black";
+                    }
                     System.out.println(message);
                     notifyAll(ctx, message);
                 }
@@ -172,19 +179,23 @@ public class Server {
                 sendError();
             }
         } else if (type == UserGameCommand.CommandType.LEAVE) {
+            var command = new Gson().fromJson(json, LeaveCommand.class);
             try {
                 if (db.checkAuth(command.getAuthToken())) {
                     String username = db.getAuth(command.getAuthToken()).username();
-                    System.out.printf(username + " leaving the game.%n%n");
                     notifyAll(ctx, username + " left the game.%n%n");
-                    leaveGame(ctx);
+                    leaveGame(ctx, command.getGameID(), command.white());
                 }
             } catch(Exception e) {
                 sendError();
             }
         } else if (type == UserGameCommand.CommandType.RESIGN) {
+            var command = new Gson().fromJson(json, ResignCommand.class);
+
 
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
+            var command = new Gson().fromJson(json, MakeMoveCommand.class);
+
 
         }
     }
@@ -212,12 +223,16 @@ public class Server {
         }
     }
 
-    public void leaveGame(WsMessageContext ctx) {
-        for (var client : clients) {
-            if (client.session.equals(ctx.session)) {
-                clients.remove(client);
-                System.out.printf("removed client from game.%n%n");
+    public void leaveGame(WsMessageContext ctx, int gameID, Boolean white) throws Exception {
+        if (white != null) {
+            ChessGame.TeamColor color;
+            if (white) {
+                color = ChessGame.TeamColor.WHITE;
+            } else {
+                color = ChessGame.TeamColor.BLACK;
             }
+            db.updatePlayer(gameID, color, null);
         }
+        clients.removeIf(client -> client.session.equals(ctx.session));
     }
 }

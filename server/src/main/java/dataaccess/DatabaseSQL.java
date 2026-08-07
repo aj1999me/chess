@@ -224,22 +224,35 @@ public class DatabaseSQL implements DataModel {
             throw new DataAccessException("game does not exist");
         }
         removeGame(gameID);
-        GameData updated;
-        if (color == ChessGame.TeamColor.WHITE) {
-            if (game.whiteUsername() != null) {
-                throw new AlreadyTakenException("color already taken");
+        String newWhite;
+        String newBlack;
+        if (username == null) {
+            if (color == ChessGame.TeamColor.WHITE) {
+                newWhite = null;
+                newBlack = game.blackUsername();
+            } else {
+                newWhite = game.whiteUsername();
+                newBlack = null;
             }
-            updated = new GameData(gameID,
-                    username, game.blackUsername(),
-                    game.gameName(), game.game());
         } else {
-            if (game.blackUsername() != null) {
-                throw new AlreadyTakenException("color already taken");
+            if (color == ChessGame.TeamColor.WHITE) {
+                if (game.whiteUsername() != null) {
+                    throw new AlreadyTakenException("color already taken");
+                }
+                newWhite = username;
+                newBlack = game.blackUsername();
+
+            } else {
+                if (game.blackUsername() != null) {
+                    throw new AlreadyTakenException("color already taken");
+                }
+                newWhite = game.whiteUsername();
+                newBlack = username;
             }
-            updated = new GameData(gameID,
-                    game.whiteUsername(), username,
-                    game.gameName(), game.game());
         }
+        var updated = new GameData(gameID,
+                newWhite, newBlack,
+                game.gameName(), game.game());
         addGame(updated);
     }
 
