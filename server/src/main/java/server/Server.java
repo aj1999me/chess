@@ -11,7 +11,9 @@ import io.javalin.http.Context;
 import com.google.gson.Gson;
 import websocket.commands.*;
 import websocket.messages.*;
+import org.eclipse.jetty.websocket.api.Session;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.HashSet;
 
@@ -22,9 +24,8 @@ public class Server {
     private DatabaseSQL db;
     private final UserService us;
     private final GameService gs;
-    private WsContext root;
 
-    private HashSet<WsContext> clients = new HashSet<>();;
+    private HashSet<WsContext> clients = new HashSet<>();
 
     public Server() {
         try {
@@ -90,7 +91,8 @@ public class Server {
     }
 
     private void clear(Context cxt) throws DataAccessException {
-        us.clear();
+        db.clear();
+        clients.clear();
         cxt.status(200);
     }
 
@@ -153,23 +155,35 @@ public class Server {
     }
 
     public void handleCommand(WsMessageContext ctx) {
-        root = ctx;
         var json = ctx.message();
         var command = new Gson().fromJson(json, UserGameCommand.class);
         var type = command.getCommandType();
         if (type == UserGameCommand.CommandType.CONNECT) {
             try {
                 if (db.checkAuth(command.getAuthToken())) {
+                    String username = db.getAuth(command.getAuthToken()).username();
                     var game = db.getGame(command.getGameID()).game();
-                    loadGame(game);
-                    String message = "someone joined the game lol";
-                    notifyAll(message);
+                    loadGame(ctx, game);
+                    String message = username + " joined the game as";
+                    System.out.println(message);
+                    notifyAll(ctx, message);
                 }
-            } catch(DataAccessException e) {
+            } catch(Exception e) {
                 sendError();
             }
         } else if (type == UserGameCommand.CommandType.LEAVE) {
-
+            try {
+                if (db.checkAuth(command.getAuthToken())) {
+                    String username = db.getAuth(command.getAuthToken()).username();
+                    var game = db.getGame(command.getGameID()).game();
+                    leaveGame(ctx);
+                    String message = username + " left the game.%n%n";
+                    System.out.printf(message);
+                    notifyAll(ctx, message);
+                }
+            } catch(Exception e) {
+                sendError();
+            }
         } else if (type == UserGameCommand.CommandType.RESIGN) {
 
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
@@ -181,20 +195,29 @@ public class Server {
 
     }
 
-    public void loadGame(ChessGame game) {
+    public void loadGame(WsMessageContext ctx, ChessGame game) throws IOException {
         Gson gson = new GsonBuilder()
                 .enableComplexMapKeySerialization()
                 .create();
         var message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        root.send(gson.toJson(message));
+        String str = gson.toJson(message);
+        ctx.send(str);
     }
 
-    public void notifyAll(String message) {
+    public void notifyAll(WsMessageContext ctx, String message) throws IOException {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
         for (var client : clients) {
-            if (!client.equals(root)) {
+            if (!client.session.equals(ctx.session)) {
                 var json = new Gson().toJson(notification);
                 client.send(json);
+            }
+        }
+    }
+
+    public void leaveGame(WsMessageContext ctx) {
+        for (var client : clients) {
+            if (client.session.equals(ctx.session)) {
+                clients.remove(ctx);
             }
         }
     }

@@ -18,8 +18,8 @@ public class GameplayLoop {
         this.token = token;
         this.ID = ID;
         this.WHITE = WHITE;
-        client = new GameplayClient(host, port, token, ID, WHITE);
         try {
+            client = new GameplayClient(host, port, token, ID, WHITE);
             client.connect();
         } catch(Exception e) {
             throw new Exception("Failed to connect to server.%n%n");

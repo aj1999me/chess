@@ -37,6 +37,7 @@ public class GameplayClient extends Endpoint {
         session = container.connectToServer(this, uri);
 
         this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+            System.out.printf("started running message handler" + message);
             var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
             if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
                 var game = new Gson().fromJson(message, LoadGameMessage.class).game();
@@ -50,7 +51,9 @@ public class GameplayClient extends Endpoint {
         });
     }
 
+    @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+        System.out.println("websocket connection open");
     }
 
     public void connect() throws Exception {
