@@ -175,11 +175,9 @@ public class Server {
             try {
                 if (db.checkAuth(command.getAuthToken())) {
                     String username = db.getAuth(command.getAuthToken()).username();
-                    var game = db.getGame(command.getGameID()).game();
+                    System.out.printf(username + " leaving the game.%n%n");
+                    notifyAll(ctx, username + " left the game.%n%n");
                     leaveGame(ctx);
-                    String message = username + " left the game.%n%n";
-                    System.out.printf(message);
-                    notifyAll(ctx, message);
                 }
             } catch(Exception e) {
                 sendError();
@@ -217,7 +215,8 @@ public class Server {
     public void leaveGame(WsMessageContext ctx) {
         for (var client : clients) {
             if (client.session.equals(ctx.session)) {
-                clients.remove(ctx);
+                clients.remove(client);
+                System.out.printf("removed client from game.%n%n");
             }
         }
     }
