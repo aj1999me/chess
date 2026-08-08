@@ -210,7 +210,9 @@ public class Server {
                 .create();
         var message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         String str = gson.toJson(message);
+        System.out.println(str);
         ctx.send(str);
+        System.out.println("sent json successfully%n%n");
     }
 
     public void notifyAll(WsMessageContext ctx, String message) throws IOException {
@@ -224,6 +226,7 @@ public class Server {
     }
 
     public void leaveGame(WsMessageContext ctx, int gameID, Boolean white) throws Exception {
+        System.out.printf("running leaveGame function%n%n");
         if (white != null) {
             ChessGame.TeamColor color;
             if (white) {
