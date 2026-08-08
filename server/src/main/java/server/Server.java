@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.GsonBuilder;
 import io.javalin.*;
 import dataaccess.*;
@@ -195,8 +196,19 @@ public class Server {
 
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
             var command = new Gson().fromJson(json, MakeMoveCommand.class);
-
-
+            try {
+                if (db.checkAuth(command.getAuthToken())) {
+                    var newGame = db.updateGame(command.getGameID(), command.move());
+                    for (var client : clients) {
+                        loadGame(client, newGame);
+                    }
+                    notifyAll(ctx, "a move was made.%n%n");
+                }
+            } catch(InvalidMoveException e) {
+                sendError();
+            } catch(Exception e) {
+                sendError();
+            }
         }
     }
 
@@ -204,15 +216,13 @@ public class Server {
 
     }
 
-    public void loadGame(WsMessageContext ctx, ChessGame game) throws IOException {
+    public void loadGame(WsContext ctx, ChessGame game) throws IOException {
         Gson gson = new GsonBuilder()
                 .enableComplexMapKeySerialization()
                 .create();
         var message = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
         String str = gson.toJson(message);
-        System.out.println(str);
         ctx.send(str);
-        System.out.println("sent json successfully%n%n");
     }
 
     public void notifyAll(WsMessageContext ctx, String message) throws IOException {

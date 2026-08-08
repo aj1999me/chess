@@ -1,5 +1,6 @@
 package client;
 
+import chess.*;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.*;
@@ -16,6 +17,7 @@ public class GameplayClient extends Endpoint {
     private String token;
     private int id;
     private final Boolean white;
+    private ChessGame game;
 
     public GameplayClient(String host, int port, String token, int id, boolean white) throws Exception {
         this.host = host;
@@ -33,7 +35,7 @@ public class GameplayClient extends Endpoint {
             System.out.printf("started running message handler" + message);
             var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
             if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
-                var game = new Gson().fromJson(message, LoadGameMessage.class).game();
+                game = new Gson().fromJson(message, LoadGameMessage.class).game();
                 new DrawBoard(white, game.getBoard());
             } else if (type == ServerMessage.ServerMessageType.ERROR) {
 
@@ -61,20 +63,26 @@ public class GameplayClient extends Endpoint {
     }
 
     public void connect() throws Exception {
-        var command = new ConnectCommand(UserGameCommand.CommandType.CONNECT, token, id, white);
+        var command = new ConnectCommand(token, id, white);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }
 
     public void leave() throws Exception {
-        var command = new LeaveCommand(UserGameCommand.CommandType.LEAVE, token, id, white);
+        var command = new LeaveCommand(token, id, white);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
         session.close();
     }
 
     public void resign() throws Exception {
-        var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, token, id);
+        var command = new ResignCommand(token, id, white);
+        var json = new Gson().toJson(command);
+        session.getBasicRemote().sendText(json);
+    }
+
+    public void makeMove(ChessMove move) throws Exception {
+        var command = new MakeMoveCommand(token, id, move);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }

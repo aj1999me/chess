@@ -1,5 +1,7 @@
 package dataaccess;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import model.*;
 import service.ListEntry;
 import static dataaccess.DatabaseManager.*;
@@ -212,6 +214,25 @@ public class DatabaseSQL implements DataModel {
             try (var prep = conn.prepareStatement("DELETE FROM gameDB WHERE gameID=?")) {
                 prep.setInt(1, gameID);
                 prep.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public ChessGame updateGame(int gameID, ChessMove move) throws DataAccessException, InvalidMoveException {
+        var game = getGame(gameID).game();
+        game.makeMove(move);
+        try(var conn = getConnection()) {
+            try (var prep = conn.prepareStatement("UPDATE gameDB SET game=? WHERE gameID=?")) {
+                Gson gson = new GsonBuilder()
+                        .enableComplexMapKeySerialization()
+                        .create();
+                var json = gson.toJson(game);
+                prep.setString(1, json);
+                prep.setInt(2, gameID);
+                prep.executeUpdate();
+                return game;
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

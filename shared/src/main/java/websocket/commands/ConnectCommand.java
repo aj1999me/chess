@@ -3,8 +3,8 @@ package websocket.commands;
 public class ConnectCommand extends UserGameCommand {
     private final boolean white;
 
-    public ConnectCommand(CommandType commandType, String authToken, Integer gameID, boolean white) {
-        super(commandType, authToken, gameID);
+    public ConnectCommand(String authToken, Integer gameID, boolean white) {
+        super(CommandType.CONNECT, authToken, gameID);
         this.white = white;
     }
 
