@@ -83,7 +83,7 @@ public class GameplayClient extends Endpoint {
     }
 
     public void makeMove(ChessMove move) throws Exception {
-        var command = new MakeMoveCommand(token, id, move);
+        var command = new MakeMoveCommand(token, id, move, white);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }

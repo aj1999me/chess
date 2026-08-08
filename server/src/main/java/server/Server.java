@@ -255,6 +255,9 @@ public class Server {
 
     public void makeMove(WsContext ctx, MakeMoveCommand command) {
         try {
+            if (command.white() == null) {
+                throw new Exception("Error: observers cannot make moves.%n%n");
+            }
             if (db.checkAuth(command.getAuthToken())) {
                 var newGame = db.updateGame(command.getGameID(), command.move());
                 for (var client : clients) {
