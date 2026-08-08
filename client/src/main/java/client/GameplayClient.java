@@ -38,7 +38,8 @@ public class GameplayClient extends Endpoint {
                 game = new Gson().fromJson(message, LoadGameMessage.class).game();
                 new DrawBoard(white, game.getBoard());
             } else if (type == ServerMessage.ServerMessageType.ERROR) {
-
+                var error = new Gson().fromJson(message, ErrorMessage.class).getMessage();
+                System.out.printf(error);
             } else if (type == ServerMessage.ServerMessageType.NOTIFICATION) {
                 var notification = new Gson().fromJson(message, ServerNotification.class).getMessage();
                 System.out.printf(notification);

@@ -13,6 +13,7 @@ import java.util.Iterator;
 public class ChessGame {
     private TeamColor turn;
     private ChessBoard board;
+    private boolean gameOver;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
@@ -23,6 +24,7 @@ public class ChessGame {
     public ChessGame(ChessGame copy) {
         turn = copy.turn;
         board = new ChessBoard(copy.board);
+        gameOver = false;
     }
 
     /**
@@ -183,6 +185,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public boolean gameOver() {
+        return gameOver;
+    }
+
+    public void endGame() {
+        gameOver = true;
     }
 
     @Override

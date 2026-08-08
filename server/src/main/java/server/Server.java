@@ -160,60 +160,23 @@ public class Server {
         var type = new Gson().fromJson(json, UserGameCommand.class).getCommandType();
         if (type == UserGameCommand.CommandType.CONNECT) {
             var command = new Gson().fromJson(json, ConnectCommand.class);
-            try {
-                if (db.checkAuth(command.getAuthToken())) {
-                    String username = db.getAuth(command.getAuthToken()).username();
-                    var game = db.getGame(command.getGameID()).game();
-                    loadGame(ctx, game);
-                    String message = username + " joined the game as ";
-                    if (command.white() == null) {
-                        message += "observer";
-                    } else if (command.white()) {
-                        message += "white";
-                    } else {
-                        message += "black";
-                    }
-                    System.out.println(message);
-                    notifyAll(ctx, message);
-                }
-            } catch(Exception e) {
-                sendError();
-            }
+            connectToGame(ctx, command);
         } else if (type == UserGameCommand.CommandType.LEAVE) {
             var command = new Gson().fromJson(json, LeaveCommand.class);
-            try {
-                if (db.checkAuth(command.getAuthToken())) {
-                    String username = db.getAuth(command.getAuthToken()).username();
-                    notifyAll(ctx, username + " left the game.%n%n");
-                    leaveGame(ctx, command.getGameID(), command.white());
-                }
-            } catch(Exception e) {
-                sendError();
-            }
+            leave(ctx, command);
         } else if (type == UserGameCommand.CommandType.RESIGN) {
             var command = new Gson().fromJson(json, ResignCommand.class);
 
 
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
             var command = new Gson().fromJson(json, MakeMoveCommand.class);
-            try {
-                if (db.checkAuth(command.getAuthToken())) {
-                    var newGame = db.updateGame(command.getGameID(), command.move());
-                    for (var client : clients) {
-                        loadGame(client, newGame);
-                    }
-                    notifyAll(ctx, "a move was made.%n%n");
-                }
-            } catch(InvalidMoveException e) {
-                sendError();
-            } catch(Exception e) {
-                sendError();
-            }
+            makeMove(ctx, command);
         }
     }
 
-    public void sendError() {
-
+    public void sendError(WsContext ctx, String message) {
+        var json = new Gson().toJson(new ErrorMessage(message));
+        ctx.send(json);
     }
 
     public void loadGame(WsContext ctx, ChessGame game) throws IOException {
@@ -225,7 +188,7 @@ public class Server {
         ctx.send(str);
     }
 
-    public void notifyAll(WsMessageContext ctx, String message) throws IOException {
+    public void notifyAll(WsContext ctx, String message) throws IOException {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
         for (var client : clients) {
             if (!client.session.equals(ctx.session)) {
@@ -235,7 +198,7 @@ public class Server {
         }
     }
 
-    public void leaveGame(WsMessageContext ctx, int gameID, Boolean white) throws Exception {
+    public void leaveGame(WsContext ctx, int gameID, Boolean white) throws Exception {
         System.out.printf("running leaveGame function%n%n");
         if (white != null) {
             ChessGame.TeamColor color;
@@ -247,5 +210,56 @@ public class Server {
             db.updatePlayer(gameID, color, null);
         }
         clients.removeIf(client -> client.session.equals(ctx.session));
+    }
+
+    public void connectToGame(WsContext ctx, ConnectCommand command) {
+        try {
+            if (db.checkAuth(command.getAuthToken())) {
+                String username = db.getAuth(command.getAuthToken()).username();
+                var game = db.getGame(command.getGameID());
+                if (game == null) {
+                    throw new Exception("Error: incorrect gameID");
+                }
+                loadGame(ctx, game.game());
+                String message = username + " joined the game as ";
+                if (command.white() == null) {
+                    message += "observer";
+                } else if (command.white()) {
+                    message += "white";
+                } else {
+                    message += "black";
+                }
+                System.out.println(message);
+                notifyAll(ctx, message);
+            }
+        } catch(Exception e) {
+            sendError(ctx, e.getMessage());
+        }
+    }
+
+    public void leave(WsContext ctx, LeaveCommand command) {
+        try {
+            if (db.checkAuth(command.getAuthToken())) {
+                String username = db.getAuth(command.getAuthToken()).username();
+                notifyAll(ctx, username + " left the game.%n%n");
+                leaveGame(ctx, command.getGameID(), command.white());
+            }
+        } catch(Exception e) {
+            sendError(ctx, e.getMessage());
+        }
+    }
+
+    public void makeMove(WsContext ctx, MakeMoveCommand command) {
+        try {
+            if (db.checkAuth(command.getAuthToken())) {
+                var newGame = db.updateGame(command.getGameID(), command.move());
+                for (var client : clients) {
+                    loadGame(client, newGame);
+                }
+                notifyAll(ctx, "a move was made.%n%n");
+            }
+        } catch(Exception e) {
+            sendError(ctx, e.getMessage());
+        }
     }
 }
