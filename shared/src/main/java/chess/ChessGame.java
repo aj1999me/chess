@@ -100,13 +100,16 @@ public class ChessGame {
 
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (gameOver) {
+            throw new InvalidMoveException("Error: this game is over");
+        }
         if (board.getPiece(move.getStartPosition()) == null) {
-            throw new InvalidMoveException("no piece there");
+            throw new InvalidMoveException("Error: no piece there");
         }
         if (board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
-            throw new InvalidMoveException("not your turn");
+            throw new InvalidMoveException("Error: not your piece");
         } else if (!validMoves(move.getStartPosition()).contains(move)) {
-            throw new InvalidMoveException("invalid move");
+            throw new InvalidMoveException("Error: invalid move");
         }
         tryMove(move);
     }
@@ -185,10 +188,6 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
-    }
-
-    public boolean gameOver() {
-        return gameOver;
     }
 
     public void endGame() {

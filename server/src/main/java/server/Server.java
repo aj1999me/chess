@@ -231,6 +231,8 @@ public class Server {
                 }
                 System.out.println(message);
                 notifyAll(ctx, message);
+            } else {
+                throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
         } catch(Exception e) {
             sendError(ctx, e.getMessage());
@@ -243,6 +245,8 @@ public class Server {
                 String username = db.getAuth(command.getAuthToken()).username();
                 notifyAll(ctx, username + " left the game.%n%n");
                 leaveGame(ctx, command.getGameID(), command.white());
+            } else {
+                throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
         } catch(Exception e) {
             sendError(ctx, e.getMessage());
@@ -257,6 +261,18 @@ public class Server {
                     loadGame(client, newGame);
                 }
                 notifyAll(ctx, "a move was made.%n%n");
+
+                if (newGame.isInCheckmate(newGame.getTeamTurn())) {
+                    newGame.endGame();
+                    notifyAll(ctx, "that's checkmate!%n%n");
+                } else if (newGame.isInCheck(newGame.getTeamTurn())) {
+                    notifyAll(ctx, "that's check%n%n");
+                } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
+                    newGame.endGame();
+                    notifyAll(ctx, "that's a stalemate!%n%n");
+                }
+            } else {
+                throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
         } catch(Exception e) {
             sendError(ctx, e.getMessage());

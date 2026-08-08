@@ -223,6 +223,7 @@ public class DatabaseSQL implements DataModel {
     public ChessGame updateGame(int gameID, ChessMove move) throws DataAccessException, InvalidMoveException {
         var game = getGame(gameID).game();
         game.makeMove(move);
+
         try(var conn = getConnection()) {
             try (var prep = conn.prepareStatement("UPDATE gameDB SET game=? WHERE gameID=?")) {
                 Gson gson = new GsonBuilder()
