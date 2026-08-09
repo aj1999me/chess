@@ -1,7 +1,6 @@
 package server;
 
 import chess.ChessGame;
-import chess.InvalidMoveException;
 import com.google.gson.GsonBuilder;
 import io.javalin.*;
 import dataaccess.*;
@@ -12,9 +11,8 @@ import io.javalin.http.Context;
 import com.google.gson.Gson;
 import websocket.commands.*;
 import websocket.messages.*;
-import org.eclipse.jetty.websocket.api.Session;
 
-import java.io.IOException;
+
 import java.util.Map;
 import java.util.HashSet;
 import java.util.TreeMap;
@@ -26,10 +24,7 @@ public class Server {
     private DatabaseSQL db;
     private final UserService us;
     private final GameService gs;
-
-    private HashSet<WsContext> clients = new HashSet<>();
-
-    private TreeMap<Integer, TreeMap<WsContext, Boolean>> games;
+    private TreeMap<Integer, HashSet<WsContext>> games = new TreeMap<>();
 
     public Server() {
         try {
@@ -95,7 +90,7 @@ public class Server {
 
     private void clear(Context cxt) throws DataAccessException {
         db.clear();
-        clients.clear();
+        games.clear();
         cxt.status(200);
     }
 
@@ -189,9 +184,9 @@ public class Server {
         ctx.send(str);
     }
 
-    public void notifyAllExceptRoot(WsContext ctx, String message) {
+    public void notifyAllExceptRoot(WsContext ctx, String message, int gameID) {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        for (var client : clients) {
+        for (var client : games.get(gameID)) {
             if (!client.session.equals(ctx.session)) {
                 var json = new Gson().toJson(notification);
                 client.send(json);
@@ -199,9 +194,9 @@ public class Server {
         }
     }
 
-    public void notifyAll(WsContext ctx, String message) {
+    public void notifyAll(String message, int gameID) {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        for (var client : clients) {
+        for (var client : games.get(gameID)) {
             var json = new Gson().toJson(notification);
             client.send(json);
         }
@@ -216,7 +211,10 @@ public class Server {
                     throw new Exception("Error: incorrect gameID");
                 }
                 loadGame(ctx, game.game());
-                clients.add(ctx);
+                if (!games.containsKey(game.gameID())) {
+                    games.put(game.gameID(), new HashSet<>());
+                }
+                games.get(game.gameID()).add(ctx);
                 String message = username + " joined the game as ";
                 if (username.equals(game.whiteUsername())) {
                     message += "white";
@@ -226,7 +224,7 @@ public class Server {
                     message += "observer";
                 }
                 System.out.println(message);
-                notifyAllExceptRoot(ctx, message);
+                notifyAllExceptRoot(ctx, message, game.gameID());
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
@@ -240,8 +238,8 @@ public class Server {
             if (db.checkAuth(command.getAuthToken())) {
                 String username = db.getAuth(command.getAuthToken()).username();
                 db.updatePlayer(command.getGameID(), checkRole(command), null);
-                notifyAllExceptRoot(ctx, username + " left the game.%n%n");
-                clients.removeIf(client -> client.session.equals(ctx.session));
+                notifyAllExceptRoot(ctx, username + " left the game.%n%n", command.getGameID());
+                games.get(command.getGameID()).removeIf(client -> client.session.equals(ctx.session));
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
@@ -253,24 +251,28 @@ public class Server {
     public void makeMove(WsContext ctx, MakeMoveCommand command) {
         try {
             if (db.checkAuth(command.getAuthToken())) {
-                if (checkRole(command) == null) {
+                var role = checkRole(command);
+                if (role == null) {
                     throw new Exception("Error: observers cannot make moves.%n%n");
                 }
+                if (role != db.getGame(command.getGameID()).game().getTeamTurn()) {
+                    throw new Exception("Error: not your turn%n%n");
+                }
                 var newGame = db.updateGame(command.getGameID(), command.move());
-                for (var client : clients) {
+                for (var client : games.get(command.getGameID())) {
                     loadGame(client, newGame);
                 }
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAllExceptRoot(ctx, username + " made a move.%n");
+                notifyAllExceptRoot(ctx, username + " made a move.%n", command.getGameID());
 
                 if (newGame.isInCheckmate(newGame.getTeamTurn())) {
                     newGame.endGame();
-                    notifyAll(ctx, "that's checkmate!%n%n");
+                    notifyAll("that's checkmate!%n%n", command.getGameID());
                 } else if (newGame.isInCheck(newGame.getTeamTurn())) {
-                    notifyAll(ctx, "that's check%n%n");
+                    notifyAll("that's check%n%n", command.getGameID());
                 } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
                     newGame.endGame();
-                    notifyAll(ctx, "that's a stalemate!%n%n");
+                    notifyAll("that's a stalemate!%n%n", command.getGameID());
                 }
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
@@ -292,7 +294,7 @@ public class Server {
                 }
                 db.endGame(command.getGameID());
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAll(ctx, username + " resigned.%n%n");
+                notifyAll(username + " resigned.%n%n", command.getGameID());
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
