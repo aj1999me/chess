@@ -240,6 +240,25 @@ public class DatabaseSQL implements DataModel {
         }
     }
 
+    public void endGame(int gameID) throws DataAccessException {
+        var game = getGame(gameID).game();
+        game.endGame();
+
+        try(var conn = getConnection()) {
+            try (var prep = conn.prepareStatement("UPDATE gameDB SET game=? WHERE gameID=?")) {
+                Gson gson = new GsonBuilder()
+                        .enableComplexMapKeySerialization()
+                        .create();
+                var json = gson.toJson(game);
+                prep.setString(1, json);
+                prep.setInt(2, gameID);
+                prep.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException, AlreadyTakenException {
         var game = getGame(gameID);
         if (game == null) {

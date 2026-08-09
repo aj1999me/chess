@@ -64,26 +64,26 @@ public class GameplayClient extends Endpoint {
     }
 
     public void connect() throws Exception {
-        var command = new ConnectCommand(token, id, white);
+        var command = new ConnectCommand(token, id);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }
 
     public void leave() throws Exception {
-        var command = new LeaveCommand(token, id, white);
+        var command = new LeaveCommand(token, id);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
         session.close();
     }
 
     public void resign() throws Exception {
-        var command = new ResignCommand(token, id, white);
+        var command = new ResignCommand(token, id);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }
 
     public void makeMove(ChessMove move) throws Exception {
-        var command = new MakeMoveCommand(token, id, move, white);
+        var command = new MakeMoveCommand(token, id, move);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }

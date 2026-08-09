@@ -281,11 +281,18 @@ public class Server {
     }
 
     public void resign(WsContext ctx, ResignCommand command) {
-        //observers cannot resign
         try {
             if (db.checkAuth(command.getAuthToken())) {
+                if (checkRole(command) == null) {
+                    throw new Exception("Observers cannot resign.%n%n");
+                }
+                var game = db.getGame(command.getGameID());
+                if (game.game().isGameOver()) {
+                    throw new Exception("Cannot resign from a game that has ended.%n%n");
+                }
+                db.endGame(command.getGameID());
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAllExceptRoot(ctx, username + " resigned.%n%n");
+                notifyAll(ctx, username + " resigned.%n%n");
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }

@@ -194,6 +194,10 @@ public class ChessGame {
         gameOver = true;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || o.getClass() != getClass()) {
