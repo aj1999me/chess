@@ -167,6 +167,13 @@ public class Server {
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
             var command = new Gson().fromJson(json, MakeMoveCommand.class);
             makeMove(ctx, command);
+        } else if (type == UserGameCommand.CommandType.REFRESH) {
+            var command = new Gson().fromJson(json, MakeMoveCommand.class);
+            try {
+                loadGame(ctx, db.getGame(command.getGameID()).game());
+            } catch(Exception e) {
+                sendError(ctx, "Error: something went wrong%n%n");
+            }
         }
     }
 
@@ -208,7 +215,7 @@ public class Server {
                 String username = db.getAuth(command.getAuthToken()).username();
                 var game = db.getGame(command.getGameID());
                 if (game == null) {
-                    throw new Exception("Error: incorrect gameID");
+                    throw new Exception("Error: incorrect gameID%n%n");
                 }
                 loadGame(ctx, game.game());
                 if (!games.containsKey(game.gameID())) {
@@ -217,11 +224,11 @@ public class Server {
                 games.get(game.gameID()).add(ctx);
                 String message = username + " joined the game as ";
                 if (username.equals(game.whiteUsername())) {
-                    message += "white";
+                    message += "white%n%n";
                 } else if (username.equals(game.blackUsername())) {
-                    message += "black";
+                    message += "black%n%n";
                 } else {
-                    message += "observer";
+                    message += "observer%n%n";
                 }
                 System.out.println(message);
                 notifyAllExceptRoot(ctx, message, game.gameID());
@@ -253,9 +260,13 @@ public class Server {
             if (db.checkAuth(command.getAuthToken())) {
                 var role = checkRole(command);
                 if (role == null) {
-                    throw new Exception("Error: observers cannot make moves.%n%n");
+                    throw new Exception("Error: observers cannot make moves%n%n");
                 }
-                if (role != db.getGame(command.getGameID()).game().getTeamTurn()) {
+                var game = db.getGame(command.getGameID()).game();
+                if (game.isGameOver()) {
+                    throw new Exception("Error: game is already over%n%n");
+                }
+                if (role != game.getTeamTurn()) {
                     throw new Exception("Error: not your turn%n%n");
                 }
                 var newGame = db.updateGame(command.getGameID(), command.move());
@@ -263,16 +274,16 @@ public class Server {
                     loadGame(client, newGame);
                 }
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAllExceptRoot(ctx, username + " made a move.%n", command.getGameID());
+                notifyAllExceptRoot(ctx, username + " made a move.%n%n", command.getGameID());
 
                 if (newGame.isInCheckmate(newGame.getTeamTurn())) {
                     newGame.endGame();
-                    notifyAll("that's checkmate!%n%n", command.getGameID());
+                    notifyAll("That's checkmate!%n%n", command.getGameID());
                 } else if (newGame.isInCheck(newGame.getTeamTurn())) {
-                    notifyAll("that's check%n%n", command.getGameID());
+                    notifyAll("That's check%n%n", command.getGameID());
                 } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
                     newGame.endGame();
-                    notifyAll("that's a stalemate!%n%n", command.getGameID());
+                    notifyAll("That's a stalemate!%n%n", command.getGameID());
                 }
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
@@ -286,11 +297,11 @@ public class Server {
         try {
             if (db.checkAuth(command.getAuthToken())) {
                 if (checkRole(command) == null) {
-                    throw new Exception("Observers cannot resign.%n%n");
+                    throw new Exception("Error: observers cannot resign%n%n");
                 }
                 var game = db.getGame(command.getGameID());
                 if (game.game().isGameOver()) {
-                    throw new Exception("Cannot resign from a game that has ended.%n%n");
+                    throw new Exception("Error: cannot resign from a game that has ended%n%n");
                 }
                 db.endGame(command.getGameID());
                 String username = db.getAuth(command.getAuthToken()).username();

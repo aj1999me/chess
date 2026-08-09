@@ -39,7 +39,6 @@ public class GameplayLoop {
 
     public void loop() {
         while (true) {
-            System.out.printf("What do you want to do?%n>>> ");
             var scanner = new Scanner(System.in);
             var args = scanner.nextLine().split(" ");
             if (args[0].equals("h") || args[0].equals("help")) {
@@ -60,9 +59,22 @@ public class GameplayLoop {
                     //highlight valid moves
                 }
             } else if (args[0].equals("r") || args[0].equals("redraw")) {
-                //refresh
+                try {
+                    client.refresh();
+                } catch(Exception e) {
+                    System.out.printf("Something went wrong, try again.%n%n");
+                }
             } else if (args[0].equals("rs") || args[0].equals("resign")) {
-                //resign
+                System.out.printf("Do you really want to resign?%n");
+                var scanner1 = new Scanner(System.in);
+                var answer = scanner1.nextLine().split(" ")[0];
+                if (answer.equals("yes") || answer.equals("y")) {
+                    try {
+                        client.resign();
+                    } catch(Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
+                }
             } else if (args[0].equals("m") || args[0].equals("move")) {
                 if (args.length < 3) {
                     System.out.printf("You need to provide a piece location and destination square, and a promotion type if applicable.%n%n");
@@ -72,13 +84,13 @@ public class GameplayLoop {
                     try {
                         client.makeMove(getMove(args[1], args[2], args[3]));
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                        System.out.printf(e.getMessage());
                     }
                 } else {
                     try {
                         client.makeMove(getMove(args[1], args[2], null));
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                        System.out.printf(e.getMessage());
                     }
                 }
             } else {

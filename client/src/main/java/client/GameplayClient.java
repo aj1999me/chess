@@ -5,23 +5,17 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.*;
 import websocket.messages.*;
-
-import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
 
 public class GameplayClient extends Endpoint {
     public Session session;
-    private String host;
-    private int port;
     private String token;
     private int id;
     private final Boolean white;
     private ChessGame game;
 
     public GameplayClient(String host, int port, String token, int id, boolean white) throws Exception {
-        this.host = host;
-        this.port = port;
         this.token = token;
         this.id = id;
         this.white = white;
@@ -32,7 +26,6 @@ public class GameplayClient extends Endpoint {
         session = container.connectToServer(this, uri);
 
         session.addMessageHandler(String.class, (MessageHandler.Whole<String>) message -> {
-            System.out.printf("started running message handler" + message);
             var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
             if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
                 game = new Gson().fromJson(message, LoadGameMessage.class).game();
@@ -48,20 +41,7 @@ public class GameplayClient extends Endpoint {
     }
 
     @Override
-    public void onOpen(Session session, EndpointConfig endpointConfig) {
-        System.out.println("websocket connection open");
-    }
-
-    @Override
-    public void onError(Session session, Throwable throwable) {
-        System.out.println("WEBSOCKET ERROR");
-        throwable.printStackTrace();
-    }
-
-    @Override
-    public void onClose(Session session, CloseReason reason) {
-        System.out.println("closing websocket connection");
-    }
+    public void onOpen(Session session, EndpointConfig endpointConfig) {}
 
     public void connect() throws Exception {
         var command = new ConnectCommand(token, id);
@@ -84,6 +64,12 @@ public class GameplayClient extends Endpoint {
 
     public void makeMove(ChessMove move) throws Exception {
         var command = new MakeMoveCommand(token, id, move);
+        var json = new Gson().toJson(command);
+        session.getBasicRemote().sendText(json);
+    }
+
+    public void refresh() throws Exception {
+        var command = new RefreshCommand(token, id);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
     }
