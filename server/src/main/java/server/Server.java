@@ -17,6 +17,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashSet;
+import java.util.TreeMap;
 
 
 public class Server {
@@ -27,6 +28,8 @@ public class Server {
     private final GameService gs;
 
     private HashSet<WsContext> clients = new HashSet<>();
+
+    private TreeMap<Integer, TreeMap<WsContext, Boolean>> games;
 
     public Server() {
         try {
@@ -48,7 +51,6 @@ public class Server {
                     ws.onConnect(ctx -> {
                         ctx.enableAutomaticPings();
                         System.out.println("Websocket connected");
-                        clients.add(ctx);
                     });
                     ws.onMessage(this::handleCommand);
                     ws.onClose(ctx -> System.out.println("Websocket closed"));
@@ -166,8 +168,7 @@ public class Server {
             leave(ctx, command);
         } else if (type == UserGameCommand.CommandType.RESIGN) {
             var command = new Gson().fromJson(json, ResignCommand.class);
-
-
+            resign(ctx, command);
         } else if (type == UserGameCommand.CommandType.MAKE_MOVE) {
             var command = new Gson().fromJson(json, MakeMoveCommand.class);
             makeMove(ctx, command);
@@ -179,7 +180,7 @@ public class Server {
         ctx.send(json);
     }
 
-    public void loadGame(WsContext ctx, ChessGame game) throws IOException {
+    public void loadGame(WsContext ctx, ChessGame game) {
         Gson gson = new GsonBuilder()
                 .enableComplexMapKeySerialization()
                 .create();
@@ -188,7 +189,7 @@ public class Server {
         ctx.send(str);
     }
 
-    public void notifyAll(WsContext ctx, String message) throws IOException {
+    public void notifyAllExceptRoot(WsContext ctx, String message) {
         var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
         for (var client : clients) {
             if (!client.session.equals(ctx.session)) {
@@ -198,18 +199,12 @@ public class Server {
         }
     }
 
-    public void leaveGame(WsContext ctx, int gameID, Boolean white) throws Exception {
-        System.out.printf("running leaveGame function%n%n");
-        if (white != null) {
-            ChessGame.TeamColor color;
-            if (white) {
-                color = ChessGame.TeamColor.WHITE;
-            } else {
-                color = ChessGame.TeamColor.BLACK;
-            }
-            db.updatePlayer(gameID, color, null);
+    public void notifyAll(WsContext ctx, String message) {
+        var notification = new ServerNotification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        for (var client : clients) {
+            var json = new Gson().toJson(notification);
+            client.send(json);
         }
-        clients.removeIf(client -> client.session.equals(ctx.session));
     }
 
     public void connectToGame(WsContext ctx, ConnectCommand command) {
@@ -221,16 +216,17 @@ public class Server {
                     throw new Exception("Error: incorrect gameID");
                 }
                 loadGame(ctx, game.game());
+                clients.add(ctx);
                 String message = username + " joined the game as ";
-                if (command.white() == null) {
-                    message += "observer";
-                } else if (command.white()) {
+                if (username.equals(game.whiteUsername())) {
                     message += "white";
-                } else {
+                } else if (username.equals(game.blackUsername())) {
                     message += "black";
+                } else {
+                    message += "observer";
                 }
                 System.out.println(message);
-                notifyAll(ctx, message);
+                notifyAllExceptRoot(ctx, message);
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
@@ -243,8 +239,9 @@ public class Server {
         try {
             if (db.checkAuth(command.getAuthToken())) {
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAll(ctx, username + " left the game.%n%n");
-                leaveGame(ctx, command.getGameID(), command.white());
+                db.updatePlayer(command.getGameID(), checkRole(command), null);
+                notifyAllExceptRoot(ctx, username + " left the game.%n%n");
+                clients.removeIf(client -> client.session.equals(ctx.session));
             } else {
                 throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
             }
@@ -255,15 +252,16 @@ public class Server {
 
     public void makeMove(WsContext ctx, MakeMoveCommand command) {
         try {
-            if (command.white() == null) {
-                throw new Exception("Error: observers cannot make moves.%n%n");
-            }
             if (db.checkAuth(command.getAuthToken())) {
+                if (checkRole(command) == null) {
+                    throw new Exception("Error: observers cannot make moves.%n%n");
+                }
                 var newGame = db.updateGame(command.getGameID(), command.move());
                 for (var client : clients) {
                     loadGame(client, newGame);
                 }
-                notifyAll(ctx, "a move was made.%n%n");
+                String username = db.getAuth(command.getAuthToken()).username();
+                notifyAllExceptRoot(ctx, username + " made a move.%n");
 
                 if (newGame.isInCheckmate(newGame.getTeamTurn())) {
                     newGame.endGame();
@@ -280,5 +278,31 @@ public class Server {
         } catch(Exception e) {
             sendError(ctx, e.getMessage());
         }
+    }
+
+    public void resign(WsContext ctx, ResignCommand command) {
+        //observers cannot resign
+        try {
+            if (db.checkAuth(command.getAuthToken())) {
+                String username = db.getAuth(command.getAuthToken()).username();
+                notifyAllExceptRoot(ctx, username + " resigned.%n%n");
+            } else {
+                throw new UnauthorizedAccessException("Error: unauthorized user%n%n");
+            }
+        } catch(Exception e) {
+            sendError(ctx, e.getMessage());
+        }
+    }
+
+    public ChessGame.TeamColor checkRole(UserGameCommand command) throws DataAccessException {
+        String username = db.getAuth(command.getAuthToken()).username();
+        var game = db.getGame(command.getGameID());
+        ChessGame.TeamColor color = null;
+        if (username.equals(game.whiteUsername())) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if (username.equals(game.blackUsername())) {
+            color = ChessGame.TeamColor.BLACK;
+        }
+        return color;
     }
 }
