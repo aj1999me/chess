@@ -18,8 +18,8 @@ public class DrawBoard {
     private final boolean flipped;
     PrintStream out;
 
-    public DrawBoard(boolean WHITE, ChessBoard board) {
-        this.flipped = !WHITE;
+    public DrawBoard(boolean white, ChessBoard board) {
+        this.flipped = !white;
         this.board = board;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);

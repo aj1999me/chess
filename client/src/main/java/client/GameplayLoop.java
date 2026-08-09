@@ -1,37 +1,23 @@
 package client;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Scanner;
 
 import static java.lang.Integer.parseInt;
 
 public class GameplayLoop {
-    private final String host;
-    private final int port;
-    private final String token;
     private final GameplayClient client;
-    private final int ID;
-    private final boolean WHITE;
 
     private static Map<String, Integer> columns = Map.of("a", 1, "b", 2,
             "c", 3, "d", 4, "e", 5, "f", 6, "g", 7, "h", 8);
 
-    public GameplayLoop(String host, int port, String token, int ID, boolean WHITE) throws Exception {
-        this.host = host;
-        this.port = port;
-        this.token = token;
-        this.ID = ID;
-        this.WHITE = WHITE;
+    public GameplayLoop(String host, int port, String token, int id, boolean white) throws Exception {
         try {
-            client = new GameplayClient(host, port, token, ID, WHITE);
+            client = new GameplayClient(host, port, token, id, white);
             client.connect();
         } catch(Exception e) {
             throw new Exception("Failed to connect to server.%n%n");
