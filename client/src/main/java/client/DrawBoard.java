@@ -18,9 +18,20 @@ public class DrawBoard {
     private final boolean flipped;
     PrintStream out;
 
-    public DrawBoard(boolean white, ChessBoard board) {
+    public DrawBoard(boolean white, ChessGame game) {
         this.flipped = !white;
-        this.board = board;
+        board = game.getBoard();
+        out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        out.print(ERASE_SCREEN);
+        drawColumnHeaders();
+        drawRows();
+        drawColumnHeaders();
+        resetColors();
+    }
+
+    public DrawBoard(boolean white, ChessGame game, ChessPosition pos) {
+        this.flipped = !white;
+        board = game.getBoard();
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         drawColumnHeaders();
@@ -30,7 +41,7 @@ public class DrawBoard {
     }
 
     public static void main(String[] args) {
-        new DrawBoard(true, new ChessGame().getBoard());
+        new DrawBoard(true, new ChessGame());
     }
 
     public void resetColors() {

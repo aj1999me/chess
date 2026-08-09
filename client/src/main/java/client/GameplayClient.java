@@ -29,7 +29,7 @@ public class GameplayClient extends Endpoint {
             var type = new Gson().fromJson(message, ServerMessage.class).getServerMessageType();
             if (type == ServerMessage.ServerMessageType.LOAD_GAME) {
                 game = new Gson().fromJson(message, LoadGameMessage.class).game();
-                new DrawBoard(white, game.getBoard());
+                new DrawBoard(white, game);
             } else if (type == ServerMessage.ServerMessageType.ERROR) {
                 var error = new Gson().fromJson(message, ErrorMessage.class).getMessage();
                 System.out.printf(error);
@@ -72,5 +72,12 @@ public class GameplayClient extends Endpoint {
         var command = new RefreshCommand(token, id);
         var json = new Gson().toJson(command);
         session.getBasicRemote().sendText(json);
+    }
+
+    public void highlight(ChessPosition pos) throws Exception {
+        if (game.getBoard().getPiece(pos) == null) {
+            throw new Exception("Error: there is no piece there%n%n");
+        }
+        new DrawBoard(white, game, pos);
     }
 }

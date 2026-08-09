@@ -56,7 +56,11 @@ public class GameplayLoop {
                 } else if (args.length > 2) {
                     System.out.printf("You only need one piece location.%n%n");
                 } else {
-                    //highlight valid moves
+                    try {
+                        client.highlight(getSquare(args[1]));
+                    } catch(Exception e) {
+                        System.out.printf(e.getMessage());
+                    }
                 }
             } else if (args[0].equals("r") || args[0].equals("redraw")) {
                 try {
