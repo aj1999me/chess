@@ -39,66 +39,47 @@ public class GameplayLoop {
 
     public void loop() {
         while (true) {
-            var scanner = new Scanner(System.in);
-            var args = scanner.nextLine().split(" ");
-            if (args[0].equals("h") || args[0].equals("help")) {
-                listOptions();
-            } else if (args[0].equals("l") || args[0].equals("leave")) {
-                try {
+            try {
+                var scanner = new Scanner(System.in);
+                var args = scanner.nextLine().split(" ");
+                if (args[0].equals("h") || args[0].equals("help")) {
+                    listOptions();
+                } else if (args[0].equals("l") || args[0].equals("leave")) {
                     client.leave();
                     break;
-                } catch(Exception e) {
-                    System.out.printf(e.getMessage());
-                }
-            } else if (args[0].equals("hl") || args[0].equals("highlight")) {
-                if (args.length < 2) {
-                    System.out.printf("You need to provide a piece to highlight.%n%n");
-                } else if (args.length > 2) {
-                    System.out.printf("You only need one piece location.%n%n");
-                } else {
-                    try {
+                } else if (args[0].equals("hl") || args[0].equals("highlight")) {
+                    if (args.length < 2) {
+                        throw new Exception("You need to provide a piece to highlight.%n%n");
+                    } else if (args.length > 2) {
+                        throw new Exception("You only need one piece location.%n%n");
+                    } else {
                         client.highlight(getSquare(args[1]));
-                    } catch(Exception e) {
-                        System.out.printf(e.getMessage());
                     }
-                }
-            } else if (args[0].equals("r") || args[0].equals("redraw")) {
-                try {
+                } else if (args[0].equals("r") || args[0].equals("redraw")) {
                     client.refresh();
-                } catch(Exception e) {
                     System.out.printf("Something went wrong, try again.%n%n");
-                }
-            } else if (args[0].equals("rs") || args[0].equals("resign")) {
-                System.out.printf("Do you really want to resign?%n");
-                var scanner1 = new Scanner(System.in);
-                var answer = scanner1.nextLine().split(" ")[0];
-                if (answer.equals("yes") || answer.equals("y")) {
-                    try {
+                } else if (args[0].equals("rs") || args[0].equals("resign")) {
+                    System.out.printf("Do you really want to resign?%n");
+                    var scanner1 = new Scanner(System.in);
+                    var answer = scanner1.nextLine().split(" ")[0];
+                    if (answer.equals("yes") || answer.equals("y")) {
                         client.resign();
-                    } catch(Exception e) {
-                        System.out.printf(e.getMessage());
                     }
-                }
-            } else if (args[0].equals("m") || args[0].equals("move")) {
-                if (args.length < 3) {
-                    System.out.printf("You need to provide a piece location and destination square, and a promotion type if applicable.%n%n");
-                } else if (args.length > 4) {
-                    System.out.printf("You only need a piece location and destination square (and maybe a promotion type.)%n%n");
-                } else if (args.length == 4){
-                    try {
+                } else if (args[0].equals("m") || args[0].equals("move")) {
+                    if (args.length < 3) {
+                        throw new Exception("You need to provide a piece location and destination square, and a promotion type if applicable.%n%n");
+                    } else if (args.length > 4) {
+                        throw new Exception("You only need a piece location and destination square (and maybe a promotion type.)%n%n");
+                    } else if (args.length == 4) {
                         client.makeMove(getMove(args[1], args[2], args[3]));
-                    } catch (Exception e) {
-                        System.out.printf(e.getMessage());
+                    } else {
+                        client.makeMove(getMove(args[1], args[2], null));
                     }
                 } else {
-                    try {
-                        client.makeMove(getMove(args[1], args[2], null));
-                    } catch (Exception e) {
-                        System.out.printf(e.getMessage());
-                    }
+                    System.out.printf("Sorry, that input was invalid.%n%n");
                 }
-            } else {
-                System.out.printf("Sorry, that input was invalid.%n%n");
+            } catch(Exception e) {
+                System.out.printf(e.getMessage());
             }
         }
     }
