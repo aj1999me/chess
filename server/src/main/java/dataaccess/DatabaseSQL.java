@@ -260,41 +260,67 @@ public class DatabaseSQL implements DataModel {
     }
 
     public void updatePlayer(int gameID, ChessGame.TeamColor color, String username) throws DataAccessException, AlreadyTakenException {
+        if (color == null) {
+            return;
+        }
         var game = getGame(gameID);
         if (game == null) {
             throw new DataAccessException("game does not exist");
         }
-        removeGame(gameID);
-        String newWhite;
-        String newBlack;
-        if (username == null) {
-            if (color == ChessGame.TeamColor.WHITE) {
-                newWhite = null;
-                newBlack = game.blackUsername();
-            } else {
-                newWhite = game.whiteUsername();
-                newBlack = null;
+        String column = "";
+        if (color == ChessGame.TeamColor.WHITE) {
+            if (game.whiteUsername() != null && username != null) {
+                throw new AlreadyTakenException("color already taken");
             }
-        } else {
-            if (color == ChessGame.TeamColor.WHITE) {
-                if (game.whiteUsername() != null) {
-                    throw new AlreadyTakenException("color already taken");
-                }
-                newWhite = username;
-                newBlack = game.blackUsername();
-
-            } else {
-                if (game.blackUsername() != null) {
-                    throw new AlreadyTakenException("color already taken");
-                }
-                newWhite = game.whiteUsername();
-                newBlack = username;
+            column = "whiteUsername";
+        } else if (color == ChessGame.TeamColor.BLACK) {
+            if (game.blackUsername() != null && username != null) {
+                throw new AlreadyTakenException("color already taken");
             }
+            column = "blackUsername";
         }
-        var updated = new GameData(gameID,
-                newWhite, newBlack,
-                game.gameName(), game.game());
-        addGame(updated);
+        String sql = "UPDATE gameDB SET " + column + "=? WHERE gameID=?";
+        try(var conn = getConnection()) {
+            try (var prep = conn.prepareStatement(sql)) {
+
+                prep.setString(1, username);
+                prep.setInt(2, gameID);
+                prep.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+//        removeGame(gameID);
+//        String newWhite;
+//        String newBlack;
+//        if (username == null) {
+//            if (color == ChessGame.TeamColor.WHITE) {
+//                newWhite = null;
+//                newBlack = game.blackUsername();
+//            } else {
+//                newWhite = game.whiteUsername();
+//                newBlack = null;
+//            }
+//        } else {
+//            if (color == ChessGame.TeamColor.WHITE) {
+//                if (game.whiteUsername() != null) {
+//                    throw new AlreadyTakenException("color already taken");
+//                }
+//                newWhite = username;
+//                newBlack = game.blackUsername();
+//
+//            } else {
+//                if (game.blackUsername() != null) {
+//                    throw new AlreadyTakenException("color already taken");
+//                }
+//                newWhite = game.whiteUsername();
+//                newBlack = username;
+//            }
+//        }
+//        var updated = new GameData(gameID,
+//                newWhite, newBlack,
+//                game.gameName(), game.game());
+//        addGame(updated);
     }
 
     public void clear() throws DataAccessException {

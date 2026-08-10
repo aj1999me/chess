@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Iterator;
 
@@ -73,6 +74,16 @@ public class ChessGame {
             }
         }
         return moves;
+    }
+
+    public HashSet<ChessPosition> getHighlightSet(ChessPosition start) {
+        var squares = new HashSet<ChessPosition>();
+        squares.add(start);
+        var moves = validMoves(start);
+        for (var move : moves) {
+            squares.add(move.getEndPosition());
+        }
+        return squares;
     }
 
     public void tryMove(ChessMove move) {

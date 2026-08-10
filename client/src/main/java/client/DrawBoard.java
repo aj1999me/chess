@@ -2,12 +2,12 @@ package client;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
+
 import static ui.EscapeSequences.*;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 public class DrawBoard {
     private static String[] columnMarks = {"  \u2003a   ", "  \u2003b   ", "  \u2003c   ", "  \u2003d   ",
@@ -17,10 +17,12 @@ public class DrawBoard {
     private ChessBoard board;
     private final boolean flipped;
     PrintStream out;
+    private HashSet<ChessPosition> squares;
 
     public DrawBoard(boolean white, ChessGame game) {
         this.flipped = !white;
         board = game.getBoard();
+        squares = new HashSet<ChessPosition>();
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         drawColumnHeaders();
@@ -32,6 +34,7 @@ public class DrawBoard {
     public DrawBoard(boolean white, ChessGame game, ChessPosition pos) {
         this.flipped = !white;
         board = game.getBoard();
+        squares = game.getHighlightSet(pos);
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         drawColumnHeaders();
@@ -103,7 +106,7 @@ public class DrawBoard {
         }
         drawEmptyRow(whiteFirst);
         drawRowMark(i);
-        drawWithPieces(i);
+        drawWithPieces(i+1);
         drawRowMark(i);
         endLine();
         drawEmptyRow(whiteFirst);
@@ -151,8 +154,7 @@ public class DrawBoard {
         out.println();
     }
 
-    public void drawWithPieces(int i) {
-        int actualRow = i+1;
+    public void drawWithPieces(int actualRow) {
         int actualCol;
         for (int j = 0; j < 8; ++j) {
             if (flipped) {
@@ -177,7 +179,7 @@ public class DrawBoard {
 
     public void printPiece(ChessPiece piece) {
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            out.print(SET_TEXT_COLOR_GREEN);
+            out.print(SET_TEXT_COLOR_BLUE);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) {
                 out.print(WHITE_KING);
             } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) {
