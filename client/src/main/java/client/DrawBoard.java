@@ -98,55 +98,22 @@ public class DrawBoard {
     }
 
     public void drawRow(int i) {
-        boolean whiteFirst;
-        if (flipped) {
-            whiteFirst = i % 2 == 0;
-        } else {
-            whiteFirst = i % 2 != 0;
-        }
-        drawEmptyRow(whiteFirst);
+        int actualRow = i + 1;
+        drawEmptyRow(actualRow);
         drawRowMark(i);
-        drawWithPieces(i+1);
+        drawSquares(actualRow, false);
         drawRowMark(i);
         endLine();
-        drawEmptyRow(whiteFirst);
+        drawEmptyRow(actualRow);
     }
 
-    public void drawEmptyRow(boolean whiteFirst) {
+    public void drawEmptyRow(int actualRow) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(EMPTY);
-        if (whiteFirst) {
-            eightSquareLengthsWhiteFirst();
-        } else {
-            eightSquareLengthsBlackFirst();
-        }
+        drawSquares(actualRow, true);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(EMPTY);
         endLine();
-    }
-
-    public void eightSquareLengthsWhiteFirst() {
-        for (int i = 0; i < 4; ++i) {
-            oneSquareLengthWhite();
-            oneSquareLengthBlack();
-        }
-    }
-
-    public void eightSquareLengthsBlackFirst() {
-        for (int i = 0; i < 4; ++i) {
-            oneSquareLengthBlack();
-            oneSquareLengthWhite();
-        }
-    }
-
-    public void oneSquareLengthWhite() {
-        out.print(SET_BG_COLOR_WHITE);
-        out.print(EMPTY);
-    }
-
-    public void oneSquareLengthBlack() {
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(EMPTY);
     }
 
     public void endLine() {
@@ -154,7 +121,7 @@ public class DrawBoard {
         out.println();
     }
 
-    public void drawWithPieces(int actualRow) {
+    public void drawSquares(int actualRow, boolean skipPieces) {
         int actualCol;
         for (int j = 0; j < 8; ++j) {
             if (flipped) {
@@ -163,13 +130,21 @@ public class DrawBoard {
                 actualCol = j + 1;
             }
             boolean white = (actualRow + actualCol) % 2 != 0;
-            if (white) {
-                out.print(SET_BG_COLOR_WHITE);
+            if (squares.contains(new ChessPosition(actualRow, actualCol))) {
+                if (white) {
+                    out.print(SET_BG_COLOR_YELLOW);
+                } else {
+                    out.print(SET_BG_COLOR_DARK_YELLOW);
+                }
             } else {
-                out.print(SET_BG_COLOR_BLACK);
+                if (white) {
+                    out.print(SET_BG_COLOR_WHITE);
+                } else {
+                    out.print(SET_BG_COLOR_BLACK);
+                }
             }
             var piece = board.getPiece(new ChessPosition(actualRow, actualCol));
-            if (piece == null) {
+            if (skipPieces || piece == null) {
                 out.print(EMPTY);
             } else {
                 printPiece(piece);

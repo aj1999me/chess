@@ -290,37 +290,6 @@ public class DatabaseSQL implements DataModel {
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
-//        removeGame(gameID);
-//        String newWhite;
-//        String newBlack;
-//        if (username == null) {
-//            if (color == ChessGame.TeamColor.WHITE) {
-//                newWhite = null;
-//                newBlack = game.blackUsername();
-//            } else {
-//                newWhite = game.whiteUsername();
-//                newBlack = null;
-//            }
-//        } else {
-//            if (color == ChessGame.TeamColor.WHITE) {
-//                if (game.whiteUsername() != null) {
-//                    throw new AlreadyTakenException("color already taken");
-//                }
-//                newWhite = username;
-//                newBlack = game.blackUsername();
-//
-//            } else {
-//                if (game.blackUsername() != null) {
-//                    throw new AlreadyTakenException("color already taken");
-//                }
-//                newWhite = game.whiteUsername();
-//                newBlack = username;
-//            }
-//        }
-//        var updated = new GameData(gameID,
-//                newWhite, newBlack,
-//                game.gameName(), game.game());
-//        addGame(updated);
     }
 
     public void clear() throws DataAccessException {
