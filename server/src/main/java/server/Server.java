@@ -274,14 +274,15 @@ public class Server {
                     loadGame(client, newGame);
                 }
                 String username = db.getAuth(command.getAuthToken()).username();
-                notifyAllExceptRoot(ctx, username + " made a move.%n%n", command.getGameID());
-
-                if (newGame.isInCheckmate(newGame.getTeamTurn())) {
+                String message = username + " moved " + command.move().getStartPosition().toString() + " to " + command.move().getEndPosition().toString() + ".%n%n";
+                notifyAllExceptRoot(ctx, message, command.getGameID());
+                var color = newGame.getTeamTurn();
+                if (newGame.isInCheckmate(color)) {
                     newGame.endGame();
-                    notifyAll("That's checkmate!%n%n", command.getGameID());
-                } else if (newGame.isInCheck(newGame.getTeamTurn())) {
-                    notifyAll("That's check%n%n", command.getGameID());
-                } else if (newGame.isInStalemate(newGame.getTeamTurn())) {
+                    notifyAll(username + " delivered checkmate!%n%n", command.getGameID());
+                } else if (newGame.isInCheck(color)) {
+                    notifyAll(username + " checked his opponent%n%n", command.getGameID());
+                } else if (newGame.isInStalemate(color)) {
                     newGame.endGame();
                     notifyAll("That's a stalemate!%n%n", command.getGameID());
                 }
@@ -319,7 +320,7 @@ public class Server {
         var game = db.getGame(command.getGameID());
         ChessGame.TeamColor color = null;
         if (username.equals(game.whiteUsername())) {
-            color = ChessGame.TeamColor.WHITE;
+            color = chess.ChessGame.TeamColor.WHITE;
         } else if (username.equals(game.blackUsername())) {
             color = ChessGame.TeamColor.BLACK;
         }

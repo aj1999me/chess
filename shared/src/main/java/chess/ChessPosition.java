@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -9,6 +10,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
+
+    private static final String[] columns = {"a", "b", "c", "d", "e", "f", "g", "h"};
+
     private final int row;
     private final int col;
 
@@ -50,5 +54,10 @@ public class ChessPosition {
     @Override
     public int hashCode() {
         return Objects.hash(row, col);
+    }
+
+    @Override
+    public String toString() {
+        return columns[col - 1] + row;
     }
 }
